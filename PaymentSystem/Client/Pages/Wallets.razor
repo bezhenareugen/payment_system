@@ -1,0 +1,92 @@
+﻿@page "/wallets"
+@using Microsoft.AspNetCore.Authorization
+@using Microsoft.AspNetCore.Components.WebAssembly.Authentication
+@using PaymentSystem.Shared
+@attribute [Authorize]
+@inject HttpClient Http
+
+
+
+<h3>Wallets</h3>
+
+<style>
+    .wallets {
+        width: 250px;
+        border: 1px solid black;
+        border-radius: 5px;
+        margin: 10px;
+        padding: 10px;
+
+    }
+</style>
+
+@if (WalletList == null || WalletList.Length == 0)
+{
+    <div>Loading...</div>
+}
+else
+{
+    @foreach (var wallet in WalletList)
+    {
+        <div class="wallets">
+            <div>@wallet.Id</div>
+            <div>
+                <span>@wallet.Amount</span>
+
+                <span>@wallet.Currency</span>
+            </div>
+            <button @onclick="() => DeleteWallet(wallet.Id)">Delete Wallet</button>
+        </div>
+    }
+}
+
+
+<div>
+    <h3>Create a new wallet</h3>
+    <input type="text" placeholder="Currency" @bind="Currency" />
+
+    <button @onclick="() => CreateWallet()">Create</button>
+</div>
+
+
+
+@code {
+    private Wallet[] WalletList;
+    private string Currency;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            WalletList = await Http.GetFromJsonAsync<Wallet[]>("api/wallet");
+        }
+        catch (AccessTokenNotAvailableException exception)
+        {
+            exception.Redirect();
+        }
+    }
+
+    private async Task CreateWallet()
+    {
+        try
+        {
+            await Http.PostAsJsonAsync("api/wallet", Currency);
+        }
+        catch (AccessTokenNotAvailableException exception)
+        {
+            exception.Redirect();
+        }
+    }
+
+    private void DeleteWallet(Guid id)
+    {
+        try
+        {
+            Http.DeleteAsync("api/wallet/" + id);
+        }
+        catch (AccessTokenNotAvailableException exception)
+        {
+            exception.Redirect();
+        }
+    }
+}
