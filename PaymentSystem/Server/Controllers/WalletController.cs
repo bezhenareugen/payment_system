@@ -33,6 +33,16 @@ namespace PaymentSystem.Server.Controllers
             return wallets;
         }
 
+        [HttpGet]
+        [Route("{id}")]
+        public Wallet GetWallet(Guid id)
+        {
+            var userId = _userManager.GetUserId(User);
+            var wallet = _context.Users.Include(w => w.Wallets).FirstOrDefault(u => u.Id == userId).Wallets.FirstOrDefault(w => w.Id == id);
+            return wallet;
+
+        }
+
         [HttpPost]
         public void CreateWallet([FromBody] string currency)
         {
@@ -40,36 +50,29 @@ namespace PaymentSystem.Server.Controllers
 
             var wallet = new Wallet
             {
-                
                 Amount = 0,
                 Currency = currency,
-
             };
 
             _context.Users.Include(w => w.Wallets).FirstOrDefault(u => u.Id == userId).Wallets.Add(wallet);
             _context.SaveChanges();
-
-           
-
         }
 
-
+     /*TODO: Post request*/
+     
 
         [HttpDelete]
         [Route("{id}")]
         public void DeleteWallet(Guid id)
         {
-            // var userId = _userManager.GetUserId(User);
+             var userId = _userManager.GetUserId(User);
 
-            //  var delWallet = _context.Users.Include(w => w.Wallets).FirstOrDefault(u => u.Id == userId).Wallets.FirstOrDefault(w => w.Id == id);
+              var delWallet = _context.Users.Include(w => w.Wallets).FirstOrDefault(u => u.Id == userId).Wallets.FirstOrDefault(w => w.Id == id);
 
-            var delWallet = _context.Wallets.FirstOrDefault(w => w.Id == id);
+          //  var delWallet = _context.Wallets.FirstOrDefault(w => w.Id == id);
 
             _context.Remove(delWallet);
             _context.SaveChanges();
-
-       
-
         }
 
     }

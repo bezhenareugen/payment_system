@@ -3,11 +3,11 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.30621.155
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PaymentSystem.Server", "PaymentSystem\Server\PaymentSystem.Server.csproj", "{8532B187-F1EE-45D6-A07A-549B7BE66AD9}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PaymentSystem.Server", "PaymentSystem\Server\PaymentSystem.Server.csproj", "{8532B187-F1EE-45D6-A07A-549B7BE66AD9}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PaymentSystem.Client", "PaymentSystem\Client\PaymentSystem.Client.csproj", "{D0715931-6BF7-43FA-94FE-E3715A7E2840}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PaymentSystem.Client", "PaymentSystem\Client\PaymentSystem.Client.csproj", "{D0715931-6BF7-43FA-94FE-E3715A7E2840}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PaymentSystem.Shared", "PaymentSystem\Shared\PaymentSystem.Shared.csproj", "{CCB2F48A-0AE8-406D-A5EE-F2F0A08E9EA4}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PaymentSystem.Shared", "PaymentSystem\Shared\PaymentSystem.Shared.csproj", "{CCB2F48A-0AE8-406D-A5EE-F2F0A08E9EA4}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

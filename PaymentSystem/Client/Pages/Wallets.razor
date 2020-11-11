@@ -35,8 +35,15 @@ else
                 <span>@wallet.Currency</span>
             </div>
             <button @onclick="() => DeleteWallet(wallet.Id)">Delete Wallet</button>
+
+            <button @onclick="MakeTransfer">Make Transfer</button>
+          
+          
         </div>
+
+
     }
+    
 }
 
 
@@ -54,7 +61,13 @@ else
     private string Currency;
 
 
+
     protected override async Task OnInitializedAsync()
+    {
+        await LoadWallets();
+    }
+
+    private async Task LoadWallets()
     {
         try
         {
@@ -70,7 +83,17 @@ else
     {
         try
         {
-            await Http.PostAsJsonAsync("api/wallet", Currency);
+            if (string.IsNullOrWhiteSpace(Currency))
+            {
+                return;
+            }
+
+            var respone =  await Http.PostAsJsonAsync("api/wallet", Currency);
+
+            if(respone.IsSuccessStatusCode)
+            {
+                await LoadWallets();
+            }
         }
         catch (AccessTokenNotAvailableException exception)
         {
@@ -78,17 +101,31 @@ else
         }
     }
 
-    private void DeleteWallet(Guid id)
+
+
+    private async Task DeleteWallet(Guid id)
     {
         try
         {
-            Http.DeleteAsync($"api/wallet/{id}");
+            var response =  Http.DeleteAsync($"api/wallet/{id}");
+
+            await LoadWallets();
         }
         catch (AccessTokenNotAvailableException exception)
         {
             exception.Redirect();
         }
     }
+    private async Task MakeTransfer(Guid id )
+    {
 
-
+        try
+        {
+         
+        }
+        catch (AccessTokenNotAvailableException exception)
+        {
+            exception.Redirect();
+        }
+    }
 }
