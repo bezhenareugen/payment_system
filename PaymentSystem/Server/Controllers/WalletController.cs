@@ -53,6 +53,8 @@ namespace PaymentSystem.Server.Controllers
 
         }
 
+
+
         [HttpDelete]
         [Route("{id}")]
         public void DeleteWallet(Guid id)

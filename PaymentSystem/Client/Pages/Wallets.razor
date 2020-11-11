@@ -16,7 +16,6 @@
         border-radius: 5px;
         margin: 10px;
         padding: 10px;
-
     }
 </style>
 
@@ -54,6 +53,7 @@ else
     private Wallet[] WalletList;
     private string Currency;
 
+
     protected override async Task OnInitializedAsync()
     {
         try
@@ -82,11 +82,13 @@ else
     {
         try
         {
-            Http.DeleteAsync("api/wallet/" + id);
+            Http.DeleteAsync($"api/wallet/{id}");
         }
         catch (AccessTokenNotAvailableException exception)
         {
             exception.Redirect();
         }
     }
+
+
 }
