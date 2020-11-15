@@ -322,11 +322,11 @@ namespace PaymentSystem.Server.Migrations
                     b.Property<DateTime>("Date")
                         .HasColumnType("datetime2");
 
-                    b.Property<Guid>("DestinationWalletId")
-                        .HasColumnType("uniqueidentifier");
+                    b.Property<string>("DestinationUsername")
+                        .HasColumnType("nvarchar(max)");
 
-                    b.Property<Guid>("SourceWalletId")
-                        .HasColumnType("uniqueidentifier");
+                    b.Property<string>("SourceUsername")
+                        .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
 

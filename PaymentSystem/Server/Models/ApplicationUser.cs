@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Identity;
+
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,6 +13,6 @@ namespace PaymentSystem.Server.Models
         public string LastName { get; set; }
         public DateTime CreatedOn { get; set; }
 
-       public List<Wallet> Wallets { get; set; }
+        public List<Wallet> Wallets { get; set; }
     }
 }

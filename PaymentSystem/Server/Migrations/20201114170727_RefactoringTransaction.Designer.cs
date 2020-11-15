@@ -10,8 +10,8 @@ using PaymentSystem.Server.Data;
 namespace PaymentSystem.Server.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20201108184017_AddedDomain")]
-    partial class AddedDomain
+    [Migration("20201114170727_RefactoringTransaction")]
+    partial class RefactoringTransaction
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -324,11 +324,11 @@ namespace PaymentSystem.Server.Migrations
                     b.Property<DateTime>("Date")
                         .HasColumnType("datetime2");
 
-                    b.Property<Guid>("DestinationWalletId")
-                        .HasColumnType("uniqueidentifier");
+                    b.Property<string>("DestinationUsername")
+                        .HasColumnType("nvarchar(max)");
 
-                    b.Property<Guid>("SourceWalletId")
-                        .HasColumnType("uniqueidentifier");
+                    b.Property<string>("SourceUsername")
+                        .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
 

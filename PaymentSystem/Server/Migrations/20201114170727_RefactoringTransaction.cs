@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace PaymentSystem.Server.Migrations
 {
-    public partial class AddedDomain : Migration
+    public partial class RefactoringTransaction : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
@@ -88,8 +88,8 @@ namespace PaymentSystem.Server.Migrations
                 columns: table => new
                 {
                     Id = table.Column<Guid>(nullable: false),
-                    SourceWalletId = table.Column<Guid>(nullable: false),
-                    DestinationWalletId = table.Column<Guid>(nullable: false),
+                    SourceUsername = table.Column<string>(nullable: true),
+                    DestinationUsername = table.Column<string>(nullable: true),
                     Amount = table.Column<decimal>(nullable: false),
                     Date = table.Column<DateTime>(nullable: false)
                 },

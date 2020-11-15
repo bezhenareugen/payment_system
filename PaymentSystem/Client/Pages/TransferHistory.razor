@@ -1,0 +1,122 @@
+﻿@page "/transferhistory"
+@using PaymentSystem.Shared
+@using Microsoft.AspNetCore.Components.WebAssembly.Authentication
+@inject HttpClient Http
+
+<h3>Transaction History</h3>
+
+@if(TransactionList == null)
+{
+<div>Loading...</div>
+}
+else
+{
+<table class="table">
+    <thead>
+        <tr>
+            <th scope="col">SourceUserName</th> 
+            <th scope="col" class="sort-link">
+            <a @onclick="() => LoadSortAmount()">Amount</a>
+            </th>
+            <th scope="col">DestinationId</th>
+            <th scope="col" class="sort-link">
+                <a @onclick="() => LoadSort()">Date</a>
+            </th>
+            <th scope="col">ID</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in TransactionList)
+        {
+            <tr>
+                <td>@item.SourceUsername</td>
+                <td>@item.Amount</td>
+                <td>@item.DestinationUsername</td>
+                <td>@item.Date</td>
+                <td>@item.Id</td>
+            </tr>
+        }
+
+    </tbody>
+</table>    
+}
+
+<style>
+    .sort-link {
+        cursor: pointer;
+    }
+</style>
+
+
+@code {
+    private List<Transaction> TransactionList;
+    private bool IsAsc { get; set; }
+    private string SortDir { get; set; }
+    private string SortBy { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadTransactions();
+    }
+
+    private async Task LoadTransactions()
+    {
+        try
+        {
+            TransactionList = await Http.GetFromJsonAsync<List<Transaction>>("api/transferhistory");
+        }
+        catch (AccessTokenNotAvailableException exception)
+        {
+            exception.Redirect();
+        }
+    }
+
+    private async Task LoadSort()
+    {
+        SortBy = "Date";
+
+        try
+        {
+            if (!IsAsc)
+            {
+                SortDir = "asc";
+                IsAsc = true;
+            }
+            else
+            {
+                SortDir = "desc";
+                IsAsc = false;
+            }
+
+            TransactionList = await Http.GetFromJsonAsync<List<Transaction>>($"api/transferhistory/sorted?sortDir={SortDir}&sortBy={SortBy}");
+        }
+        catch (AccessTokenNotAvailableException exception)
+        {
+            exception.Redirect();
+        }
+    }
+
+    private async Task LoadSortAmount()
+    {
+        SortBy = "Amount";
+
+        try
+        {
+            if (!IsAsc)
+            {
+                SortDir = "asc";
+                IsAsc = true;
+            }
+            else
+            {
+                SortDir = "desc";
+                IsAsc = false;
+            }
+            TransactionList = await Http.GetFromJsonAsync<List<Transaction>>($"api/transferhistory/sorted?sortDir={SortDir}&sortBy={SortBy}");
+        }
+        catch (AccessTokenNotAvailableException exception)
+        {
+            exception.Redirect();
+        }
+    }
+}

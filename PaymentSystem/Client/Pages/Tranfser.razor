@@ -1,17 +1,16 @@
-﻿@page "/transfer        alletId}"
+﻿@page "/transfer"
 @using Microsoft.AspNetCore.Authorization
 @using Microsoft.AspNetCore.Components.WebAssembly.Authentication
 @using PaymentSystem.Shared
 @attribute [Authorize]
 @inject HttpClient Http
-
-
+@inject NavigationManager Nav
 
 
 <h3>Tranfser</h3>
 
 
-@if (wallet == null)
+@if (WalletList == null)
 {
     <div>
         Loading...
@@ -19,33 +18,64 @@
 }
 else
 {
-    <div class="card" style="width: 18rem;">
+  @*  <div class="card" style="width: 18rem;">
         <div class="card-body">
             <h5 class="card-title">Wallet @wallet.Id</h5>
             <p class="card-text">Amount: @wallet.Amount @wallet.Currency</p>
-            <p>UserNAme:</p>
-            <input @bind="transferDto.UserName" />
+            <p>UserName:</p>
+            <input class="input-userName" @bind="transferDto.UserName" /> 
+            <p class="error-message">@errorMessage</p>
             <p>Amount:</p>
-            <input @bind="transferDto.Amount" />
+            <input class="input-amount" @bind="transferDto.Amount" />
             <button class="btn btn-primary" @onclick="MakeTransfer">Make Transfer</button>
-           </div>
-    </div>
+        </div>
+    </div>*@
+
+            <div>
+                <div>
+                    <span>Select currency:</span>
+                    <select @bind="transferDto.Currency">
+                        @foreach (var wallet in WalletList)
+                        {
+                            <option value="@wallet.Currency">@wallet.Currency</option>
+                        }
+                    </select>
+                </div>
+                <div>
+                    <span>Input ricipient name:</span>
+                    <input type="text" @bind="transferDto.UserName" @onfocusout="@ValidateUser" class="@RecipientInputClass" />
+                </div>
+                <div>
+                    <span>Amount:</span>
+                    <input type="number" @bind="transferDto.Amount" />
+                </div>
+                <div>
+                    <button class="btn btn-primary" @onclick="MakeTransfer">Make Transfer</button>
+                </div>
+            </div>
+
+
 }
 
+
 @code {
+
     [Parameter]
     public string SourceWalletId { get; set; }
-    public Wallet wallet { get; set; }
-
+    private List<Wallet> WalletList { get; set; }
 
     public TransferDto transferDto { get; set; } = new TransferDto();
+    private string RecipientInputClass { get; set; }
+
+
 
 
     protected override async Task OnInitializedAsync()
     {
         try
         {
-            wallet = await Http.GetFromJsonAsync<Wallet>($"api/wallet/{SourceWalletId}");
+            WalletList = await Http.GetFromJsonAsync<List<Wallet>>($"api/wallet");
+            transferDto.Currency = WalletList.FirstOrDefault()?.Currency;
         }
         catch (AccessTokenNotAvailableException exception)
         {
@@ -53,13 +83,39 @@ else
         }
     }
 
+    private async Task ValidateUser()
+    {
+        try
+        {
+            var result = await Http.GetFromJsonAsync<UserValidationResult>($"api/user/{transferDto.UserName}/validate");
+
+            if (result.Exists)
+            {
+                RecipientInputClass = "border border-success";
+            }
+            else
+            {
+                RecipientInputClass = "border border-danger";
+
+            }
+        }
+        catch (AccessTokenNotAvailableException exception)
+        {
+            exception.Redirect();
+        }
+    }
 
     private async Task MakeTransfer()
     {
         try
         {
-            transferDto.SourceWalletId = SourceWalletId;
-            transferDto.Currency = wallet.Currency;
+            var response = await Http.PostAsJsonAsync("api/wallet/transfer", transferDto);
+
+            if (response.IsSuccessStatusCode)
+            {
+                Nav.NavigateTo("wallets");
+            }
+
         }
         catch (AccessTokenNotAvailableException exception)
         {
