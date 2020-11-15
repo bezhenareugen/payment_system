@@ -40,31 +40,6 @@ namespace PaymentSystem.Server.Controllers
             return userTransactions;
         }
 
-        [HttpGet]
-        [Route("sortbyasc")]
-        public List<Transaction> GetSort()
-        {
-            var userId = _userManager.GetUserId(User);
-
-            var user = _context.Users.FirstOrDefault(x => x.Id == userId);
-
-            var userTransactions = _context.Transactions.OrderBy(x => x.Date).Where(x => x.SourceUsername == user.UserName || x.DestinationUsername == user.UserName).ToList();
-
-            return userTransactions;
-        }
-
-        [HttpGet]
-        [Route("sortbydesc")]
-        public List<Transaction> GetSortDsc()
-        {
-            var userId = _userManager.GetUserId(User);
-
-            var user = _context.Users.FirstOrDefault(x => x.Id == userId);
-
-            var userTransactions = _context.Transactions.OrderByDescending(x => x.Date).Where(x => x.SourceUsername == user.UserName || x.DestinationUsername == user.UserName).ToList();
-
-            return userTransactions;
-        }
 
         [HttpGet]
         [Route("sorted")]
