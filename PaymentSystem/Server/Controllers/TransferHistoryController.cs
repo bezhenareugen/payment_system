@@ -43,11 +43,13 @@ namespace PaymentSystem.Server.Controllers
 
         [HttpGet]
         [Route("sorted")]
-        public List<Transaction> GetSortAmount([FromQuery] string sortDir, string sortBy)
+        public List<Transaction> GetSortAmount([FromQuery] string sortDir, string sortBy, int pageNumber, int itemsPerPage)
         {
             var userId = _userManager.GetUserId(User);
 
             var user = _context.Users.FirstOrDefault(x => x.Id == userId);
+            var items = _context.Transactions.Count();
+
 
             var query = _context.Transactions.Where(x => x.SourceUsername == user.UserName || x.DestinationUsername == user.UserName).AsQueryable();
 
@@ -77,7 +79,13 @@ namespace PaymentSystem.Server.Controllers
                     }
                     break;
             }
-            var result = query.ToList();
+          
+            
+            decimal pages = items / itemsPerPage;
+        
+            pages = Math.Ceiling(pages);
+         
+            var result = query.Skip((pageNumber - 1)* itemsPerPage).Take(itemsPerPage).ToList();
 
             return result;
         }

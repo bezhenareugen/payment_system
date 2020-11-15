@@ -18,7 +18,7 @@ else
             <th scope="col" class="sort-link">
             <a @onclick="() => LoadSortAmount()">Amount</a>
             </th>
-            <th scope="col">DestinationId</th>
+            <th scope="col">DestinationUsername</th>
             <th scope="col" class="sort-link">
                 <a @onclick="() => LoadSort()">Date</a>
             </th>
@@ -53,6 +53,9 @@ else
     private bool IsAsc { get; set; }
     private string SortDir { get; set; }
     private string SortBy { get; set; }
+    private int PageNumber { get; set; }
+    private int ItemsPerPage { get; set; }
+
 
     protected override async Task OnInitializedAsync()
     {
@@ -63,7 +66,10 @@ else
     {
         try
         {
-            TransactionList = await Http.GetFromJsonAsync<List<Transaction>>("api/transferhistory");
+            PageNumber = 1;
+            ItemsPerPage = 9;
+
+            TransactionList = await Http.GetFromJsonAsync<List<Transaction>>($"api/transferhistory/sorted?sortDir={SortDir}&sortBy={SortBy}&pageNumber={PageNumber}&itemsPerPage={ItemsPerPage}");
         }
         catch (AccessTokenNotAvailableException exception)
         {
@@ -74,6 +80,8 @@ else
     private async Task LoadSort()
     {
         SortBy = "Date";
+        PageNumber = 1;
+        ItemsPerPage = 9;
 
         try
         {
@@ -88,7 +96,7 @@ else
                 IsAsc = false;
             }
 
-            TransactionList = await Http.GetFromJsonAsync<List<Transaction>>($"api/transferhistory/sorted?sortDir={SortDir}&sortBy={SortBy}");
+            TransactionList = await Http.GetFromJsonAsync<List<Transaction>>($"api/transferhistory/sorted?sortDir={SortDir}&sortBy={SortBy}&pageNumber={PageNumber}&itemsPerPage={ItemsPerPage}");
         }
         catch (AccessTokenNotAvailableException exception)
         {
@@ -112,7 +120,7 @@ else
                 SortDir = "desc";
                 IsAsc = false;
             }
-            TransactionList = await Http.GetFromJsonAsync<List<Transaction>>($"api/transferhistory/sorted?sortDir={SortDir}&sortBy={SortBy}");
+            TransactionList = await Http.GetFromJsonAsync<List<Transaction>>($"api/transferhistory/sorted?sortDir={SortDir}&sortBy={SortBy}&pageNumber={PageNumber}&itemsPerPage={ItemsPerPage}");
         }
         catch (AccessTokenNotAvailableException exception)
         {
