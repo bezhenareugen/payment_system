@@ -75,62 +75,6 @@ namespace PaymentSystem.Server.Controllers
                 Transactions = result,
                 MaxPageNumber = pages,
             };
-
-        }
-
-        /* [HttpGet]
-         public List<Transaction> GetTransactions()
-         {
-
-             var userId = _userManager.GetUserId(User);
-
-             var user = _context.Users.FirstOrDefault(x => x.Id == userId);
-
-             var userTransactions = _context.Transactions.Where(x => x.SourceUsername == user.UserName || x.DestinationUsername == user.UserName).ToList();
-
-             return userTransactions;
-         }*/
-
-
-        [HttpGet]
-        [Route("sorted")]
-        public List<Transaction> GetSortAmount([FromQuery] string sortDir, string sortBy)
-        {
-            var userId = _userManager.GetUserId(User);
-
-            var user = _context.Users.FirstOrDefault(x => x.Id == userId);
-
-            var query = _context.Transactions.Where(x => x.SourceUsername == user.UserName || x.DestinationUsername == user.UserName).AsQueryable();
-
-            switch (sortDir)
-            {
-                case "asc":
-                    switch (sortBy)
-                    {
-                        case "Amount":
-                            query = query.OrderBy(x => x.Amount);
-                            break;
-                        case "Date":
-                            query = query.OrderBy(x => x.Date);
-                            break;
-                    }
-                    break;
-
-                case "desc":
-                    switch (sortBy)
-                    {
-                        case "Amount":
-                            query = query.OrderByDescending(x => x.Amount);
-                            break;
-                        case "Date":
-                            query = query.OrderByDescending(x => x.Date);
-                            break;
-                    }
-                    break;
-            }
-            var result = query.ToList();
-
-            return result;
         }
     }
 }
