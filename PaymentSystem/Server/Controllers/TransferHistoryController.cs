@@ -28,17 +28,68 @@ namespace PaymentSystem.Server.Controllers
         }
 
         [HttpGet]
-        public List<Transaction> GetTransactions()
+        public PagenetedTransferHistory GetPageneted(string sortDir, string sortBy, int pageNumber, int itemsPerPage)
         {
+            var transactionsCount = _context.Transactions.Count();
+
+            decimal pages = transactionsCount / itemsPerPage;
+            
+            pages = Math.Ceiling(pages);
+            
 
             var userId = _userManager.GetUserId(User);
-
             var user = _context.Users.FirstOrDefault(x => x.Id == userId);
+            var query = _context.Transactions.Where(x => x.SourceUsername == user.UserName || x.DestinationUsername == user.UserName).AsQueryable();
 
-            var userTransactions = _context.Transactions.Where(x => x.SourceUsername == user.UserName || x.DestinationUsername == user.UserName).ToList();
+            switch (sortDir)
+            {
+                case "asc":
+                    switch (sortBy)
+                    {
+                        case "Amount":
+                            query = query.OrderBy(x => x.Amount);
+                            break;
+                        case "Date":
+                            query = query.OrderBy(x => x.Date);
+                            break;
+                    }
+                    break;
 
-            return userTransactions;
+                case "desc":
+                    switch (sortBy)
+                    {
+                        case "Amount":
+                            query = query.OrderByDescending(x => x.Amount);   
+                            break;
+                        case "Date":
+                            query = query.OrderByDescending(x => x.Date);
+                            break;
+                    }
+                    break;
+            }
+
+            var result = query.Skip((pageNumber -1)* itemsPerPage).Take(itemsPerPage).ToList();
+
+            return new PagenetedTransferHistory
+            {
+                Transactions = result,
+                MaxPageNumber = pages,
+            };
+
         }
+
+        /* [HttpGet]
+         public List<Transaction> GetTransactions()
+         {
+
+             var userId = _userManager.GetUserId(User);
+
+             var user = _context.Users.FirstOrDefault(x => x.Id == userId);
+
+             var userTransactions = _context.Transactions.Where(x => x.SourceUsername == user.UserName || x.DestinationUsername == user.UserName).ToList();
+
+             return userTransactions;
+         }*/
 
 
         [HttpGet]

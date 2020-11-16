@@ -5,40 +5,61 @@
 
 <h3>Transaction History</h3>
 
-@if(TransactionList == null)
+@if (PagenetedTransfer == null)
 {
-<div>Loading...</div>
+    <div>Loading...</div>
 }
 else
 {
-<table class="table">
-    <thead>
-        <tr>
-            <th scope="col">SourceUserName</th> 
-            <th scope="col" class="sort-link">
-            <a @onclick="() => LoadSortAmount()">Amount</a>
-            </th>
-            <th scope="col">DestinationId</th>
-            <th scope="col" class="sort-link">
-                <a @onclick="() => LoadSort()">Date</a>
-            </th>
-            <th scope="col">ID</th>
-        </tr>
-    </thead>
-    <tbody>
-        @foreach (var item in TransactionList)
-        {
+    <table class="table">
+        <thead>
             <tr>
-                <td>@item.SourceUsername</td>
-                <td>@item.Amount</td>
-                <td>@item.DestinationUsername</td>
-                <td>@item.Date</td>
-                <td>@item.Id</td>
+                <th scope="col">SourceUserName</th>
+                <th scope="col" class="sort-link">
+                    <a @onclick="() => LoadSortAmount()">Amount</a>
+                </th>
+                <th scope="col">DestinationId</th>
+                <th scope="col" class="sort-link">
+                    <a @onclick="() => LoadSort()">Date</a>
+                </th>
+                <th scope="col">ID</th>
             </tr>
-        }
+        </thead>
+        <tbody>
+            @foreach (var item in PagenetedTransfer.Transactions)
+            {
+                <tr>
+                    <td>@item.SourceUsername</td>
+                    <td>@item.Amount</td>
+                    <td>@item.DestinationUsername</td>
+                    <td>@item.Date</td>
+                    <td>@item.Id</td>
+                </tr>
+            }
 
-    </tbody>
-</table>    
+        </tbody>
+
+
+    </table>
+    <nav aria-label="Page navigation example">
+        <ul class="pagination justify-content-end">
+            <li class="page-item disabled">
+                <a class="page-link" href="#" tabindex="-1">Previous</a>
+            </li>
+            @for (int i = 1; i <= PagenetedTransfer.MaxPageNumber; i++)
+            {
+                var buttonNumber = i;
+                <li class="page-item"><a class="page-link" @onclick="() => ChangePage(buttonNumber)">@i</a></li>
+            }
+            <li class="page-item">
+                <a class="page-link" href="#">Next</a>
+            </li>
+        </ul>
+    </nav>
+
+    <div>
+        
+    </div>
 }
 
 <style>
@@ -49,10 +70,14 @@ else
 
 
 @code {
+    private PagenetedTransferHistory PagenetedTransfer;
     private List<Transaction> TransactionList;
     private bool IsAsc { get; set; }
     private string SortDir { get; set; }
     private string SortBy { get; set; }
+    private int pageNumber { get; set; } = 1;
+    private int itemsPerPage { get; set; } = 9;
+
 
     protected override async Task OnInitializedAsync()
     {
@@ -61,14 +86,32 @@ else
 
     private async Task LoadTransactions()
     {
+        SortBy = "Date";
+
         try
         {
-            TransactionList = await Http.GetFromJsonAsync<List<Transaction>>("api/transferhistory");
+            if (!IsAsc)
+            {
+                SortDir = "asc";
+                IsAsc = true;
+            }
+            else
+            {
+                SortDir = "desc";
+                IsAsc = false;
+            }
+            PagenetedTransfer = await Http.GetFromJsonAsync<PagenetedTransferHistory>($"api/transferhistory?sortDir={SortDir}&sortBy={SortBy}&pageNumber={pageNumber}&itemsPerPage={itemsPerPage}");
         }
         catch (AccessTokenNotAvailableException exception)
         {
             exception.Redirect();
         }
+    }
+
+    private async Task ChangePage(int cureentPage)
+    {
+        pageNumber = cureentPage;
+        await LoadTransactions();
     }
 
     private async Task LoadSort()
