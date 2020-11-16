@@ -3,7 +3,15 @@
 @using Microsoft.AspNetCore.Components.WebAssembly.Authentication
 @inject HttpClient Http
 
-<h3>Transaction History</h3>
+<div class="nav-page">
+    <h3>Transaction History</h3>
+
+    <select @bind="itemsPerPage" @onclick="() => ChangeItemsOnPage()">
+        <option value="3">3</option>
+        <option value="6">6</option>
+        <option value="8">8</option>
+    </select>
+</div>
 
 @if (PagenetedTransfer == null)
 {
@@ -36,45 +44,46 @@ else
                     <td>@item.Id</td>
                 </tr>
             }
-
         </tbody>
     </table>
 
-    <nav aria-label="Page navigation example">
-        <ul class="pagination justify-content-end">
-            <li class="page-item disabled">
-                <a class="page-link">Previous</a>
-            </li>
-            @for (int i = 1; i <= PagenetedTransfer.MaxPageNumber; i++)
-            {
-                var buttonNumber = i;
-                <li class="page-item"><a class="page-link sort-link" @onclick="() => ChangePage(buttonNumber)">@i</a></li>
-            }
-            <li class="page-item">
-                <a class="page-link">Next</a>
-            </li>
-        </ul>
-    </nav>
-
-    <div>
-        
-    </div>
+        <nav aria-label="Page navigation example">
+            <ul class="pagination justify-content-end">
+                <li class="page-item disabled">
+                    <a class="page-link">Previous</a>
+                </li>
+                @for (int i = 1; i <= PagenetedTransfer.MaxPageNumber; i++)
+                {
+                    var buttonNumber = i;
+                    <li class="page-item"><a class="page-link sort-link" @onclick="() => ChangePage(buttonNumber)">@i</a></li>
+                }
+                <li class="page-item">
+                    <a class="page-link">Next</a>
+                </li>
+            </ul>
+        </nav>
 }
 
 <style>
     .sort-link {
         cursor: pointer;
     }
+
+    .nav-page {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
 </style>
 
 
 @code {
     private PagenetedTransferHistory PagenetedTransfer;
-    private bool IsAsc { get; set; } 
+    private bool IsAsc { get; set; }
     private string SortDir { get; set; } = "asc";
     private string SortBy { get; set; } = "Date";
     private int pageNumber { get; set; } = 1;
-    private int itemsPerPage { get; set; } = 9;
+    private int itemsPerPage { get; set; } = 8;
 
 
     protected override async Task OnInitializedAsync()
@@ -135,11 +144,16 @@ else
         try
         {
             SortFilter();
-            await LoadTransactions();    
+            await LoadTransactions();
         }
         catch (AccessTokenNotAvailableException exception)
         {
             exception.Redirect();
         }
+    }
+
+    private async Task ChangeItemsOnPage()
+    {
+        await LoadTransactions();
     }
 }
