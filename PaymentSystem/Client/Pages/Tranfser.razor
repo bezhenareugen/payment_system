@@ -18,44 +18,30 @@
 }
 else
 {
-  @*  <div class="card" style="width: 18rem;">
-        <div class="card-body">
-            <h5 class="card-title">Wallet @wallet.Id</h5>
-            <p class="card-text">Amount: @wallet.Amount @wallet.Currency</p>
-            <p>UserName:</p>
-            <input class="input-userName" @bind="transferDto.UserName" /> 
-            <p class="error-message">@errorMessage</p>
-            <p>Amount:</p>
-            <input class="input-amount" @bind="transferDto.Amount" />
+    <div>
+        <div>
+            <span>Select currency:</span>
+            <select @bind="transferDto.Currency">
+                @foreach (var wallet in WalletList)
+                {
+                    <option value="@wallet.Currency">@wallet.Currency</option>
+                }
+            </select>
+        </div>
+        <div>
+            <span>Input ricipient name:</span>
+            <input type="text" @bind="transferDto.UserName" @onfocusout="@ValidateUser" class="@RecipientInputClass" />
+        </div>
+        <div>
+            <span>Amount:</span>
+            <input type="number" @bind="transferDto.Amount" />
+        </div>
+        <div>
             <button class="btn btn-primary" @onclick="MakeTransfer">Make Transfer</button>
         </div>
-    </div>*@
-
-            <div>
-                <div>
-                    <span>Select currency:</span>
-                    <select @bind="transferDto.Currency">
-                        @foreach (var wallet in WalletList)
-                        {
-                            <option value="@wallet.Currency">@wallet.Currency</option>
-                        }
-                    </select>
-                </div>
-                <div>
-                    <span>Input ricipient name:</span>
-                    <input type="text" @bind="transferDto.UserName" @onfocusout="@ValidateUser" class="@RecipientInputClass" />
-                </div>
-                <div>
-                    <span>Amount:</span>
-                    <input type="number" @bind="transferDto.Amount" />
-                </div>
-                <div>
-                    <button class="btn btn-primary" @onclick="MakeTransfer">Make Transfer</button>
-                </div>
-            </div>
-
-
+    </div>
 }
+
 
 
 @code {
@@ -66,9 +52,6 @@ else
 
     public TransferDto transferDto { get; set; } = new TransferDto();
     private string RecipientInputClass { get; set; }
-
-
-
 
     protected override async Task OnInitializedAsync()
     {
@@ -109,7 +92,7 @@ else
     {
         try
         {
-            var response = await Http.PostAsJsonAsync("api/wallet/transfer", transferDto);
+            var response = await Http.PostAsJsonAsync("api/transfer", transferDto);
 
             if (response.IsSuccessStatusCode)
             {

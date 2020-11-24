@@ -11,6 +11,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using System.Linq;
+using MediatR;
 using PaymentSystem.Server.Data;
 using PaymentSystem.Server.Models;
 using System.Security.Claims;
@@ -45,6 +46,8 @@ namespace PaymentSystem.Server
 
             services.Configure<IdentityOptions>(options =>
             options.ClaimsIdentity.UserIdClaimType = ClaimTypes.NameIdentifier);
+
+            services.AddMediatR(typeof(Startup));
 
             services.AddControllersWithViews();
             services.AddRazorPages();

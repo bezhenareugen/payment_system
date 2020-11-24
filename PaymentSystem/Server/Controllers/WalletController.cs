@@ -2,11 +2,14 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using PaymentSystem.Server.Application.Wallets.Commands;
+using PaymentSystem.Server.Application.Wallets.Queres;
 using PaymentSystem.Server.Data;
 using PaymentSystem.Server.Models;
 using PaymentSystem.Shared;
@@ -22,16 +25,22 @@ namespace PaymentSystem.Server.Controllers
     {
         private readonly ApplicationDbContext _context;
         private readonly UserManager<ApplicationUser> _userManager;
-        public WalletController(ApplicationDbContext context, UserManager<ApplicationUser> userManager)
+        private readonly IMediator _mediator;
+        public WalletController(ApplicationDbContext context, UserManager<ApplicationUser> userManager, IMediator mediator)
         {
             _context = context;
             _userManager = userManager;
+            _mediator = mediator;
         }
         [HttpGet]
-        public List<Wallet> GetWallets()
+        public async Task<List<Wallet>> GetWallets()
         {
-            var userId = _userManager.GetUserId(User);
-            var wallets = _context.Users.Include(w => w.Wallets).FirstOrDefault(u => u.Id == userId).Wallets;
+            var query = new GetWalletsQuery
+            {
+                UserId = _userManager.GetUserId(User)
+            };
+
+           var wallets =  await _mediator.Send(query);
 
             return wallets;
         }
@@ -48,35 +57,20 @@ namespace PaymentSystem.Server.Controllers
         }
 
         [HttpPost]
-        public IActionResult CreateWallet([FromBody] string currency)
+        public async Task<IActionResult> CreateWallet([FromBody] string currency)
         {
-            if(!CurrencyManager.Currencies.Contains(currency))
+            var createWalletCommand = new CreateWalletCommand
             {
-                return BadRequest();
-            }
-
-            var userId = _userManager.GetUserId(User);
-
-            var user = _context.Users.Include(w => w.Wallets).FirstOrDefault(u => u.Id == userId);
-
-            if(user.Wallets.Any(w => w.Currency == currency))
-            {
-                return BadRequest();
-            }
-
-            var wallet = new Wallet
-            {
-                Amount = 0,
+                UserId = _userManager.GetUserId(User),
                 Currency = currency,
             };
 
-            if(user.Wallets == null)
-            {
-                user.Wallets = new List<Wallet>();
-            }
+            var createWalletResult = await _mediator.Send(createWalletCommand);
 
-            user.Wallets.Add(wallet);
-            _context.SaveChanges();
+            if (!createWalletResult.IsSuccessful)
+            {
+                return BadRequest();
+            }
 
             return Ok();
         }
@@ -135,14 +129,22 @@ namespace PaymentSystem.Server.Controllers
      
         [HttpDelete]
         [Route("{id}")]
-        public void DeleteWallet(Guid id)
+        public async Task<IActionResult> DeleteWallet(Guid id)
         {
-             var userId = _userManager.GetUserId(User);
+            var query = new DeleteWalletQuery
+            {
+                UserId = _userManager.GetUserId(User),
+                WalletId = id,   
+            };
 
-             var delWallet = _context.Users.Include(w => w.Wallets).FirstOrDefault(u => u.Id == userId).Wallets.FirstOrDefault(w => w.Id == id);
+            var createDeleteResult = await _mediator.Send(query);
 
-            _context.Remove(delWallet);
-            _context.SaveChanges();  
+            if(!createDeleteResult.IsSuccessful)
+            {
+                return BadRequest();
+            }
+
+            return Ok();
         }
     }
 }
