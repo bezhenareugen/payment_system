@@ -45,6 +45,7 @@ namespace PaymentSystem.Server.Controllers
             return wallets;
         }
 
+
         [HttpGet]
         [Route("{id}")]
         public Wallet GetWallet(Guid id)
@@ -53,7 +54,6 @@ namespace PaymentSystem.Server.Controllers
             var wallet = _context.Users.Include(w => w.Wallets).FirstOrDefault(u => u.Id == userId).Wallets.FirstOrDefault(w => w.Id == id);
            
             return wallet;
-
         }
 
         [HttpPost]
@@ -75,58 +75,7 @@ namespace PaymentSystem.Server.Controllers
             return Ok();
         }
 
-        [HttpPost]
-        [Route("transfer")]
-        public ActionResult MakeTranfer([FromBody] TransferDto data)
-        {
-            var userId = _userManager.GetUserId(User);
-
-            var user = _context.Users.Include(u => u.Wallets).FirstOrDefault(u => u.Id == userId);
-
-            if (!user.Wallets.Any(w => w.Currency == data.Currency))
-            {
-                return BadRequest();
-            }
-
-            var source = user.Wallets.FirstOrDefault(w => w.Currency == data.Currency);
-
-            if (source.Amount < data.Amount)
-            {
-                return BadRequest();
-            }
-
-            var destinationUser = _context.Users.Include(w => w.Wallets).FirstOrDefault(u => u.UserName == data.UserName);
-
-            var destinationWallet = destinationUser.Wallets.FirstOrDefault(w => w.Currency == data.Currency);
-
-            if(destinationWallet == null)
-            {
-                 destinationWallet  = new Wallet
-                {
-                    Amount = 0,
-                    Currency = data.Currency,
-                };
-
-                destinationUser.Wallets.Add(destinationWallet);
-            }
-
-            source.Amount -= data.Amount;
-            destinationWallet.Amount += data.Amount;
-            
-
-            var transaction = new Transaction
-            {
-                SourceUsername = user.UserName,
-                DestinationUsername = destinationUser.UserName,
-                Amount = data.Amount,
-                Date = DateTime.Now,
-            };
-            _context.Add(transaction);
-            _context.SaveChanges();
-
-            return Ok();
-        }
-     
+      
         [HttpDelete]
         [Route("{id}")]
         public async Task<IActionResult> DeleteWallet(Guid id)
