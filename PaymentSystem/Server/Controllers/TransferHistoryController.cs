@@ -36,78 +36,18 @@ namespace PaymentSystem.Server.Controllers
         [HttpGet]
         public async Task<PagenetedTransferHistory> GetPageneted(string sortDir, string sortBy, int pageNumber, int itemsPerPage)
         {
-            var transactionsCount = _context.Transactions.Count();
-
-            decimal pages = transactionsCount / itemsPerPage;
-
-            pages = Math.Ceiling(pages);
-
-
             var transfer = new GetTransferHistoriesQuery
             {
                 UserId = _userManager.GetUserId(User),
                 SortBy = sortBy,
-                SortDir = sortDir,
-                MaxPageNumbers = pages,
+                SortDir = sortDir,          
                 ItemsPerPage = itemsPerPage,
                 PageNumber = pageNumber,
             };
 
-            var transferHistory = _mediator.Send(transfer);
+            var transferHistory = await _mediator.Send(transfer);
 
-            return await transferHistory;
-        }
-
-        [HttpPost]
-        [Route("transfer")]
-        public ActionResult MakeTranfer([FromBody] TransferDto data)
-        {
-            var userId = _userManager.GetUserId(User);
-
-            var user = _context.Users.Include(u => u.Wallets).FirstOrDefault(u => u.Id == userId);
-
-            if (!user.Wallets.Any(w => w.Currency == data.Currency))
-            {
-                return BadRequest();
-            }
-
-            var source = user.Wallets.FirstOrDefault(w => w.Currency == data.Currency);
-
-            if (source.Amount < data.Amount)
-            {
-                return BadRequest();
-            }
-
-            var destinationUser = _context.Users.Include(w => w.Wallets).FirstOrDefault(u => u.UserName == data.UserName);
-
-            var destinationWallet = destinationUser.Wallets.FirstOrDefault(w => w.Currency == data.Currency);
-
-            if (destinationWallet == null)
-            {
-                destinationWallet = new Models.Wallet
-                {
-                    Amount = 0,
-                    Currency = data.Currency,
-                };
-
-                destinationUser.Wallets.Add(destinationWallet);
-            }
-
-            source.Amount -= data.Amount;
-            destinationWallet.Amount += data.Amount;
-
-
-            var transaction = new Transaction
-            {
-                SourceUsername = user.UserName,
-                DestinationUsername = destinationUser.UserName,
-                Amount = data.Amount,
-                Date = DateTime.Now,
-            };
-            _context.Add(transaction);
-            _context.SaveChanges();
-
-            return Ok();
+            return transferHistory;
         }
     }
 }

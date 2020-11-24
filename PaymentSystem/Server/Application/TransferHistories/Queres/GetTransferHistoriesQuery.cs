@@ -17,7 +17,6 @@ namespace PaymentSystem.Server.Application.TransferHistories.Queres
         public string SortBy { get; set; }
         public int PageNumber { get; set; }
         public int ItemsPerPage { get; set; }
-        public decimal MaxPageNumbers { get; set; }
     }
 
     public class GetTransferHistoryHandler : IRequestHandler<GetTransferHistoriesQuery, PagenetedTransferHistory>
@@ -32,9 +31,15 @@ namespace PaymentSystem.Server.Application.TransferHistories.Queres
         public async Task<PagenetedTransferHistory> Handle(GetTransferHistoriesQuery query, CancellationToken cancelletionToken)
         {
             var user = await _context.Users.FirstOrDefaultAsync(x => x.Id == query.UserId);
-            var history = _context.Transactions
-                .Where(x => x.SourceUsername == user.UserName || x.DestinationUsername == user.UserName)
-                .AsQueryable();
+
+            var transactions = _context.Transactions
+                .Where(x => x.SourceUsername == user.UserName || x.DestinationUsername == user.UserName);
+
+            var transactionsCount = transactions.Count();
+            decimal pages = transactionsCount / query.ItemsPerPage;
+
+            var history = transactions.AsQueryable();
+                
 
             if (history == null)
             {
@@ -73,7 +78,7 @@ namespace PaymentSystem.Server.Application.TransferHistories.Queres
             return new PagenetedTransferHistory
             {
                 Transactions = result,
-                MaxPageNumber = query.MaxPageNumbers,
+                MaxPageNumber = pages,
             };
         }
     }

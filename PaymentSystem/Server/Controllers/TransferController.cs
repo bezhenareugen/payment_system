@@ -15,13 +15,11 @@ namespace PaymentSystem.Server.Controllers
     [Authorize]
     public class TransferController : ControllerBase
     {
-        private readonly ApplicationDbContext _context;
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly IMediator _mediator;
 
-        public TransferController(ApplicationDbContext context, UserManager<ApplicationUser> userManager, IMediator mediator)
+        public TransferController(UserManager<ApplicationUser> userManager, IMediator mediator)
         {
-            _context = context;
             _userManager = userManager;
             _mediator = mediator;
         }
