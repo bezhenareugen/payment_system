@@ -3,14 +3,21 @@
 @using Microsoft.AspNetCore.Components.WebAssembly.Authentication
 @inject HttpClient Http
 
+    <link href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
+
 <div class="nav-page">
     <h3>Transaction History</h3>
-
-    <select @bind="itemsPerPage" @onclick="() => LoadTransactions(pageNumber)">
-        <option value="3">3</option>
-        <option value="6">6</option>
-        <option value="8">8</option>
-    </select>
+    <div class="d-flex align-content-center">
+        <div class="mr-1">
+            <p class="m-0">Show</p>
+        </div>
+        <select @bind="itemsPerPage" @onclick="() => LoadTransactions(pageNumber)">
+            <option value="3">3</option>
+            <option value="6">6</option>
+            <option value="8">8</option>
+        </select>
+    </div>
+   
 </div>
 
 @if (PagenetedTransfer == null)
@@ -25,10 +32,12 @@ else
                 <th scope="col">Source User</th>
                 <th scope="col" class="sort-link">
                     <a @onclick="() => SortByAmount()">Amount</a>
+                    <span class="fa @(SetSortIcon("Amount"))"></span>
                 </th>
                 <th scope="col">Destination User</th>
                 <th scope="col" class="sort-link">
                     <a @onclick="() => SortByDate()">Date</a>
+                    <span class="fa @(SetSortIcon("Date"))"></span>
                 </th>
                 @*TODO: Istead ID - diplay Amount of wallet after transaction *@
                 <th scope="col">ID</th>
@@ -88,7 +97,8 @@ else
     private string SortBy { get; set; } = "Date";
     private int pageNumber { get; set; } = 1;
     private int itemsPerPage { get; set; } = 8;
-  
+    private string activeSortColumn;
+
 
     protected override async Task OnInitializedAsync()
     {
@@ -120,8 +130,10 @@ else
         SortDir = SortDir == "asc" ? "desc" : "asc";
     }
 
+
     private async Task SortByDate()
     {
+        activeSortColumn = "Date";
         try
         {
             SortDirFilter();
@@ -132,10 +144,12 @@ else
             exception.Redirect();
         }
     }
+
 
     private async Task SortByAmount()
     {
         SortBy = "Amount";
+        activeSortColumn = "Amount";
 
         try
         {
@@ -147,6 +161,24 @@ else
             exception.Redirect();
         }
     }
+
+
+    private string SetSortIcon(string columnName)
+    {
+        if (activeSortColumn != columnName)
+        {
+            return string.Empty;
+        }
+        if (SortDir == "asc")
+        {
+            return "fa-sort-up";
+        }
+        else
+        {
+            return "fa-sort-down";
+        }
+    }
+
 
     private async Task NextPage()
     {
@@ -156,6 +188,7 @@ else
             await LoadTransactions(pageNumber);
         }
     }
+
 
     private async Task PreviousPage()
     {
