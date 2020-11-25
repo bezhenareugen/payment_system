@@ -24,24 +24,24 @@
 }
 else
 {
-    @foreach (var wallet in WalletList)
-    {
-        <div class="wallet">
-            <div>
-                <span>@wallet.Amount</span>
-                <span>@wallet.Currency</span>
+    <div class="d-flex flex-wrap">
+        @foreach (var wallet in WalletList)
+        {
+            <div class="card" style="width: 18rem;">
+                <div class="card-body">
+                    <h5 class="card-title">Wallet</h5>
+                    <p class="card-text">Currency: @wallet.Currency</p>
+                    <p class="card-text">Amount: @wallet.Amount</p>
+                    <button class="btn btn-primary" @onclick="() => MakeTransfer(wallet.Id)">Make transfer</button>
+                    <button class="btn btn-danger" @onclick="() => DeleteWallet(wallet.Id)">Delete wallet</button>
+                </div>
             </div>
-            <div>
-                <button @onclick="() => DeleteWallet(wallet.Id)">Delete wallet</button>
-                <button @onclick="() => MakeTransfer(wallet.Id)">Make transfer</button>
-      
-            </div>
-        </div>
-    }
+        }
+    </div>
 
     @if (AllowedCurrencies.Any())
     {
-        <div>
+        <div class="mt-3">
             <h3>Create a new wallet</h3>
 
             <select @bind="Currency">
@@ -152,7 +152,7 @@ else
     {
         try
         {
-           navManager.NavigateTo("transfer");
+            navManager.NavigateTo("transfer");
         }
         catch (AccessTokenNotAvailableException exception)
         {
