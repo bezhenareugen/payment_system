@@ -22,13 +22,11 @@ namespace PaymentSystem.Server.Controllers
 
     public class TransferHistoryController : ControllerBase
     {
-        private readonly ApplicationDbContext _context;
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly IMediator _mediator;
         
-        public TransferHistoryController(ApplicationDbContext context, UserManager<ApplicationUser> userManager, IMediator mediator)
+        public TransferHistoryController(UserManager<ApplicationUser> userManager, IMediator mediator)
         {
-            _context = context;
             _userManager = userManager;
             _mediator = mediator;
         }
