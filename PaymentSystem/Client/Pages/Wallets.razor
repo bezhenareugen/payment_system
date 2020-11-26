@@ -32,7 +32,7 @@ else
                     <h5 class="card-title">Wallet</h5>
                     <p class="card-text">Currency: @wallet.Currency</p>
                     <p class="card-text">Amount: @wallet.Amount</p>
-                    <button class="btn btn-primary" @onclick="() => MakeTransfer(wallet.Id)">Make transfer</button>
+                    <button class="btn btn-primary" @onclick="() => MakeTransfer(wallet.Currency)">Make transfer</button>
                     <button class="btn btn-danger" @onclick="() => DeleteWallet(wallet.Id)">Delete wallet</button>
                 </div>
             </div>
@@ -148,11 +148,11 @@ else
         }
     }
 
-    private void MakeTransfer(Guid id)
+    private void MakeTransfer(string currency)
     {
         try
         {
-            navManager.NavigateTo("transfer");
+            navManager.NavigateTo($"transfer/{currency}");
         }
         catch (AccessTokenNotAvailableException exception)
         {

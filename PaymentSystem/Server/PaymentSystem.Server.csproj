@@ -6,6 +6,13 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Application\TransferHistories\Commands\**" />
+    <Content Remove="Application\TransferHistories\Commands\**" />
+    <EmbeddedResource Remove="Application\TransferHistories\Commands\**" />
+    <None Remove="Application\TransferHistories\Commands\**" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="MediatR" Version="9.0.0" />
     <PackageReference Include="MediatR.Extensions.Microsoft.DependencyInjection" Version="9.0.0" />
     <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.Server" Version="3.2.1" />
@@ -26,7 +33,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Application\TransferHistories\Commands\" />
     <Folder Include="Data\Migrations\" />
     <Folder Include="Migrations\" />
   </ItemGroup>

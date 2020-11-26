@@ -3,10 +3,10 @@
 @using Microsoft.AspNetCore.Components.WebAssembly.Authentication
 @inject HttpClient Http
 
-    <link href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
+ <link href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
 
 <div class="nav-page">
-    <h3>Transaction History</h3>
+    <h3>Transfer History</h3>
     <div class="d-flex align-content-center">
         <div class="mr-1">
             <p class="m-0">Show</p>
@@ -34,14 +34,12 @@ else
                     <a @onclick="() => SortByAmount()">Amount</a>
                     <span class="fa @(SetSortIcon("Amount"))"></span>
                 </th>
-                <th scope="col" class="sort-link">Currency</th>
+                <th scope="col">Currency</th>
                 <th scope="col">Destination User</th>
                 <th scope="col" class="sort-link">
                     <a @onclick="() => SortByDate()">Date</a>
                     <span class="fa @(SetSortIcon("Date"))"></span>
-                </th>
-                @*TODO: Istead ID - diplay Amount of wallet after transaction *@
-                <th scope="col">Currency</th>
+                </th>           
             </tr>
         </thead>
         <tbody>
@@ -53,7 +51,6 @@ else
                 <td>@item.Currency</td>
                 <td>@item.DestinationUsername</td>
                 <td>@item.Date</td>
-
             </tr>
             }
         </tbody>
@@ -95,11 +92,11 @@ else
 
 @code {
     private PaginetedTransferHistory PagenetedTransfer;
-    private string SortDir { get; set; } = "asc";
+    private string SortDir { get; set; } = "desc";
     private string SortBy { get; set; } = "Date";
     private int pageNumber { get; set; } = 1;
     private int itemsPerPage { get; set; } = 8;
-    private string activeSortColumn;
+    private string activeSortColumn = "Date";
 
 
     protected override async Task OnInitializedAsync()
@@ -135,6 +132,7 @@ else
 
     private async Task SortByDate()
     {
+        SortBy = "Date";
         activeSortColumn = "Date";
         try
         {

@@ -1,4 +1,5 @@
-﻿@page "/transfer"
+﻿@page "/transfer/"
+@page "/transfer/{currency}"
 @using Microsoft.AspNetCore.Authorization
 @using Microsoft.AspNetCore.Components.WebAssembly.Authentication
 @using PaymentSystem.Shared
@@ -29,10 +30,10 @@ else
             </select>
         </div>
         <div class="input-group p-0 col-md-3 mb-3">
-            <input type="text" @bind="transferDto.UserName" @onfocusout="ValidateUser" class="form-control" placeholder="Username" aria-label="Username" aria-describedby="basic-addon1">
+            <input type="text" @bind="transferDto.UserName" @onfocusout="ValidateUser" class="form-control @RecipientInputClass" placeholder="@placeholderMessage" aria-label="Username" aria-describedby="basic-addon1">
         </div>
         <div class="input-group p-0 col-md-3 mb-3">
-            <input type="text" @bind="transferDto.Amount" class="form-control" placeholder="Amount" aria-label="Username" aria-describedby="basic-addon1">
+            <input type="text" @bind="transferDto.Amount" class="form-control" placeholder="Amount" aria-label="Amount" aria-describedby="basic-addon1">
         </div>
 
         <button class="btn btn-primary" @onclick="MakeTransfer">Make Transfer</button>
@@ -41,17 +42,29 @@ else
 
 
 @code {
+    [Parameter]
+    public string Currency { get; set; }
     private List<Wallet> WalletList { get; set; }
-
     public TransferDto transferDto { get; set; } = new TransferDto();
     private string RecipientInputClass { get; set; }
+    private UserValidationResult userValidationResult { get; set; }
+    private string placeholderMessage = "Username";
+
 
     protected override async Task OnInitializedAsync()
     {
         try
         {
             WalletList = await Http.GetFromJsonAsync<List<Wallet>>($"api/wallet");
-            transferDto.Currency = WalletList.FirstOrDefault()?.Currency;
+            if(Currency == null)
+            {
+                transferDto.Currency = WalletList.FirstOrDefault()?.Currency;
+            }
+            else
+            {
+                transferDto.Currency = Currency;
+            }
+
         }
         catch (AccessTokenNotAvailableException exception)
         {
@@ -63,16 +76,23 @@ else
     {
         try
         {
-            var result = await Http.GetFromJsonAsync<UserValidationResult>($"api/user/{transferDto.UserName}/validate");
-
-            if (result.Exists)
+            if (string.IsNullOrWhiteSpace(transferDto.UserName))
             {
-                RecipientInputClass = "border border-success";
+                RecipientInputClass = "is-invalid";
+                placeholderMessage = "User empty or not found";
             }
             else
             {
-                RecipientInputClass = "is-invalid";
+                userValidationResult = await Http.GetFromJsonAsync<UserValidationResult>($"api/user/{transferDto.UserName}/validate");
 
+                if (userValidationResult.Exists)
+                {
+                    RecipientInputClass = "border border-success";
+                }
+                else
+                {
+                    RecipientInputClass = "is-invalid";
+                }
             }
         }
         catch (AccessTokenNotAvailableException exception)
@@ -84,19 +104,17 @@ else
     private async Task MakeTransfer()
     {
         try
-        {
+        {     
             var response = await Http.PostAsJsonAsync("api/transfer", transferDto);
 
             if (response.IsSuccessStatusCode)
             {
                 Nav.NavigateTo("wallets");
             }
-
         }
         catch (AccessTokenNotAvailableException exception)
         {
             exception.Redirect();
         }
     }
-
 }

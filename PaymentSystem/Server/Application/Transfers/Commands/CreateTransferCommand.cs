@@ -44,6 +44,11 @@ namespace PaymentSystem.Server.Application.Transfers.Commands
 
         public async Task<CreateTransferResult> Handle(CreateTransferCommand command, CancellationToken cancellationToken)
         {
+            if(command.UserName == null)
+            {
+                return CreateTransferResult.ReturnFailure();
+            }
+
             var user = await _context.Users.Include(u => u.Wallets).FirstOrDefaultAsync(u => u.Id == command.UserId);
 
             if (!user.Wallets.Any(w => w.Currency == command.Currency))
