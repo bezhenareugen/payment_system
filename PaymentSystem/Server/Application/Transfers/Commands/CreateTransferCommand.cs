@@ -80,7 +80,8 @@ namespace PaymentSystem.Server.Application.Transfers.Commands
             var transaction = new Transaction
             {
                 SourceUsername = user.UserName,
-                DestinationUsername = destinationUser.UserName,
+                DestinationUsername = destinationUser.UserName,    
+                Currency = command.Currency,
                 Amount = command.Amount,
                 Date = DateTime.Now,
             };

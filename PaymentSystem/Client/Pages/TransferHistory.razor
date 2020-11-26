@@ -34,25 +34,27 @@ else
                     <a @onclick="() => SortByAmount()">Amount</a>
                     <span class="fa @(SetSortIcon("Amount"))"></span>
                 </th>
+                <th scope="col" class="sort-link">Currency</th>
                 <th scope="col">Destination User</th>
                 <th scope="col" class="sort-link">
                     <a @onclick="() => SortByDate()">Date</a>
                     <span class="fa @(SetSortIcon("Date"))"></span>
                 </th>
                 @*TODO: Istead ID - diplay Amount of wallet after transaction *@
-                <th scope="col">ID</th>
+                <th scope="col">Currency</th>
             </tr>
         </thead>
         <tbody>
             @foreach (var item in PagenetedTransfer.Transactions)
             {
-                <tr>
-                    <td>@item.SourceUsername</td>
-                    <td>@item.Amount</td>
-                    <td>@item.DestinationUsername</td>
-                    <td>@item.Date</td>
-                    <td>@item.Id</td>
-                </tr>
+            <tr>
+                <td>@item.SourceUsername</td>
+                <td>@item.Amount</td>
+                <td>@item.Currency</td>
+                <td>@item.DestinationUsername</td>
+                <td>@item.Date</td>
+
+            </tr>
             }
         </tbody>
     </table>
