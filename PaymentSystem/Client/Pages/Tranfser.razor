@@ -19,7 +19,7 @@
 else
 {
     <div>
-        <div>
+        <div class="mb-3">
             <span>Select currency:</span>
             <select @bind="transferDto.Currency">
                 @foreach (var wallet in WalletList)
@@ -28,26 +28,19 @@ else
                 }
             </select>
         </div>
-        <div>
-            <span>Input ricipient name:</span>
-            <input type="text" @bind="transferDto.UserName" @onfocusout="@ValidateUser" class="@RecipientInputClass" />
+        <div class="input-group p-0 col-md-3 mb-3">
+            <input type="text" @bind="transferDto.UserName" @onfocusout="ValidateUser" class="form-control" placeholder="Username" aria-label="Username" aria-describedby="basic-addon1">
         </div>
-        <div>
-            <span>Amount:</span>
-            <input type="number" @bind="transferDto.Amount" />
+        <div class="input-group p-0 col-md-3 mb-3">
+            <input type="text" @bind="transferDto.Amount" class="form-control" placeholder="Amount" aria-label="Username" aria-describedby="basic-addon1">
         </div>
-        <div>
-            <button class="btn btn-primary" @onclick="MakeTransfer">Make Transfer</button>
-        </div>
+
+        <button class="btn btn-primary" @onclick="MakeTransfer">Make Transfer</button>
     </div>
 }
 
 
-
 @code {
-
-    [Parameter]
-    public string SourceWalletId { get; set; }
     private List<Wallet> WalletList { get; set; }
 
     public TransferDto transferDto { get; set; } = new TransferDto();
@@ -78,7 +71,7 @@ else
             }
             else
             {
-                RecipientInputClass = "border border-danger";
+                RecipientInputClass = "is-invalid";
 
             }
         }
