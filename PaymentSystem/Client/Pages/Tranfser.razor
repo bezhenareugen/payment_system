@@ -29,10 +29,10 @@ else
                 }
             </select>
         </div>
-        <div class="input-group p-0 col-md-3 mb-3">
+        <div class="input-group p-0 col-md-2 mb-3">
             <input type="text" @bind="transferDto.UserName" @onfocusout="ValidateUser" class="form-control @RecipientInputClass" placeholder="@placeholderMessage" aria-label="Username" aria-describedby="basic-addon1">
         </div>
-        <div class="input-group p-0 col-md-3 mb-3">
+        <div class="input-group p-0 col-md-2 mb-3">
             <input type="text" @bind="transferDto.Amount" class="form-control" placeholder="Amount" aria-label="Amount" aria-describedby="basic-addon1">
         </div>
 
@@ -47,7 +47,7 @@ else
     private List<Wallet> WalletList { get; set; }
     public TransferDto transferDto { get; set; } = new TransferDto();
     private string RecipientInputClass { get; set; }
-    private UserValidationResult userValidationResult { get; set; }
+@*    private UserValidationResult userValidationResult { get; set; }*@
     private string placeholderMessage = "Username";
 
 
@@ -83,7 +83,7 @@ else
             }
             else
             {
-                userValidationResult = await Http.GetFromJsonAsync<UserValidationResult>($"api/user/{transferDto.UserName}/validate");
+                var userValidationResult = await Http.GetFromJsonAsync<UserValidationResult>($"api/user/{transferDto.UserName}/validate");
 
                 if (userValidationResult.Exists)
                 {
