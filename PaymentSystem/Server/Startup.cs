@@ -15,6 +15,8 @@ using MediatR;
 using PaymentSystem.Server.Data;
 using PaymentSystem.Server.Models;
 using System.Security.Claims;
+using Blazored.Modal;
+using PaymentSystem.Server.Middleware;
 
 namespace PaymentSystem.Server
 {
@@ -47,7 +49,11 @@ namespace PaymentSystem.Server
             services.Configure<IdentityOptions>(options =>
             options.ClaimsIdentity.UserIdClaimType = ClaimTypes.NameIdentifier);
 
+            services.AddBlazoredModal();
+
             services.AddMediatR(typeof(Startup));
+
+            services.AddTransient<ExceptionHandlingMiddleware>();
 
             services.AddControllersWithViews();
             services.AddRazorPages();
@@ -78,6 +84,8 @@ namespace PaymentSystem.Server
             app.UseIdentityServer();
             app.UseAuthentication();
             app.UseAuthorization();
+
+            app.UseMiddleware<ExceptionHandlingMiddleware>();
 
             app.UseEndpoints(endpoints =>
             {

@@ -65,6 +65,11 @@ namespace PaymentSystem.Server.Application.Transfers.Commands
 
             var destinationUser = _context.Users.Include(w => w.Wallets).FirstOrDefault(u => u.UserName == command.UserName);
 
+            if(destinationUser == null)
+            {
+                throw new NotFoundException();
+            }
+
             var destinationWallet = destinationUser.Wallets.FirstOrDefault(w => w.Currency == command.Currency);
 
             if (destinationWallet == null)
