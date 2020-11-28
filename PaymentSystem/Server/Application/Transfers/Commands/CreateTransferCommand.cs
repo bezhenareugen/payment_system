@@ -46,7 +46,7 @@ namespace PaymentSystem.Server.Application.Transfers.Commands
         {
             if(command.UserName == null)
             {
-                return CreateTransferResult.ReturnFailure();
+                throw new ResultFailedException();
             }
 
             var user = await _context.Users.Include(u => u.Wallets).FirstOrDefaultAsync(u => u.Id == command.UserId);
@@ -67,7 +67,7 @@ namespace PaymentSystem.Server.Application.Transfers.Commands
 
             if(destinationUser == null)
             {
-                throw new NotFoundException();
+                throw new ResultFailedException();
             }
 
             var destinationWallet = destinationUser.Wallets.FirstOrDefault(w => w.Currency == command.Currency);

@@ -14,14 +14,13 @@ namespace PaymentSystem.Server.Middleware
             {
                await next(context);
             }
-            catch (NotFoundException exception)
+            catch (NotFoundException)
             {
-                context.Response.StatusCode = StatusCodes.Status308PermanentRedirect;
-               
+                context.Response.StatusCode = StatusCodes.Status308PermanentRedirect;  
             }
-            catch(Exception exception)
+            catch (ResultFailedException)
             {
-                throw;
+                context.Response.StatusCode = StatusCodes.Status403Forbidden;
             }
         }
     }
