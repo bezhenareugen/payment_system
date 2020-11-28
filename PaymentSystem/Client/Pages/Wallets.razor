@@ -34,7 +34,7 @@ else
                     <h5 class="card-title">Wallet</h5>
                     <p class="card-text">Currency: @wallet.Currency</p>
                     <p class="card-text">Amount: @wallet.Amount</p>
-                    <button class="btn btn-primary" @onclick="() => MakeTransfer(wallet.Currency)">Make transfer</button>
+                    <button class="btn btn-primary" @onclick="() => MakeTransfer(wallet.Currency, wallet.Amount)">Make transfer</button>
                     <button class="btn btn-danger" @onclick="() => DeleteWallet(wallet.Id)">Delete wallet</button>
                 </div>
             </div>
@@ -149,7 +149,7 @@ else
         try
         {
             await HttpClient.DeleteAsync("api/wallet/" + id);
-            await LoadWallets(); 
+            await LoadWallets();
             GetAllowedCurrencies();
         }
         catch (AccessTokenNotAvailableException exception)
@@ -158,17 +158,31 @@ else
         }
     }
 
-    private void MakeTransfer(string currency)
+    private async Task MakeTransfer(string currency, decimal amount)
     {
         try
         {
-            Modal.Show<Client.Modals.TransferModal>("Test");
+            var parameters = new ModalParameters();
+
+            parameters.Add(nameof(Client.Modals.TransferModal.Currency), currency);
+            parameters.Add(nameof(Client.Modals.TransferModal.Amount), amount);
+
+            var modal = Modal.Show<Client.Modals.TransferModal>("Transfer", parameters);
+            var result = await modal.Result;
+
+            if(result.Cancelled)
+            {
+                await LoadWallets();
+            }
+
         }
         catch (AccessTokenNotAvailableException exception)
         {
             exception.Redirect();
         }
     }
+
+
 
 @*    private void MakeTransfer(string currency)
     {

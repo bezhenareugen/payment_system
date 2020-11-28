@@ -14,14 +14,17 @@
 else
 {
 <div>
-    <div class="mb-3">
+    <div class="mb-2">
         <span>Select currency:</span>
         <select @bind="transferDto.Currency">
             @foreach (var wallet in WalletList)
             {
-                <option value="@wallet.Currency">@wallet.Currency</option>
+                <option @onclick="() => ChangeAmountValue(wallet.Amount)" value="@wallet.Currency">@wallet.Currency</option>
             }
         </select>
+    </div>
+    <div class="mb-2">
+        <p class="card-text">Amount: @Amount</p>
     </div>
     <div class="input-group p-0 col-md-12 mb-3">
         <input type="text" @bind="transferDto.UserName" @onfocusout="ValidateUser" class="form-control @RecipientInputClass" placeholder="@placeholderMessage" aria-label="Username" aria-describedby="basic-addon1">
@@ -31,7 +34,7 @@ else
     </div>
 
     <button class="btn btn-primary" @onclick="MakeTransfer">Make Transfer</button>
-    <button class="btn btn-secondary" @onclick="BlazoredModal.Close">Close</button>
+    <button class="btn btn-secondary" @onclick="BlazoredModal.Cancel">Close</button>
 </div>
 }
 
@@ -40,11 +43,14 @@ else
 @code {
 
     [CascadingParameter] BlazoredModalInstance BlazoredModal { get; set; }
+    [Parameter] public string Currency { get; set; }
+    [Parameter] public decimal Amount { get; set; }
 
     private List<Wallet> WalletList { get; set; }
     public TransferDto transferDto { get; set; } = new TransferDto();
     private string RecipientInputClass { get; set; }
     private string placeholderMessage = "Username";
+
 
     protected override async Task OnInitializedAsync()
     {
@@ -52,7 +58,7 @@ else
         {
             WalletList = await Http.GetFromJsonAsync<List<Wallet>>($"api/wallet");
 
-            transferDto.Currency = WalletList.FirstOrDefault()?.Currency;
+            transferDto.Currency = Currency;
         }
         catch (AccessTokenNotAvailableException exception)
         {
@@ -95,11 +101,17 @@ else
         {
             var response = await Http.PostAsJsonAsync("api/transfer", transferDto);
 
-            Nav.NavigateTo($"wallets?{Constants.transferSuccess}={response.IsSuccessStatusCode}");
+            Nav.NavigateTo("wallets");
+         
         }
         catch (AccessTokenNotAvailableException exception)
         {
             exception.Redirect();
         }
+    }
+
+    private void ChangeAmountValue(decimal amount)
+    {
+        Amount = amount;
     }
 }
