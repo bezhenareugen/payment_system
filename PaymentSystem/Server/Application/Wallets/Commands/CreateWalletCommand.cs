@@ -19,15 +19,20 @@ namespace PaymentSystem.Server.Application.Wallets.Commands
     public class CreateWalletResult
     {
         public bool IsSuccessful { get; set; }
+        public string FailureReason { get; set; }
 
         public static CreateWalletResult ReturnSuccess()
         {
             return new CreateWalletResult { IsSuccessful = true };
         }
         
-        public static CreateWalletResult ReturnFailure()
+        public static CreateWalletResult ReturnFailure(string failureReasone)
         {
-            return new CreateWalletResult { IsSuccessful = false};
+            return new CreateWalletResult
+            {
+                IsSuccessful = false,
+                FailureReason = failureReasone,
+            };
         }
     }
 
@@ -45,14 +50,14 @@ namespace PaymentSystem.Server.Application.Wallets.Commands
         {
             if (!CurrencyManager.Currencies.Contains(command.Currency))
             {
-                return CreateWalletResult.ReturnFailure();
+                return CreateWalletResult.ReturnFailure("INVALID_CURRENCY");
             }
 
             var user = await _context.Users.Include(w => w.Wallets).FirstOrDefaultAsync(u => u.Id == command.UserId);
 
             if (user.Wallets.Any(w => w.Currency == command.Currency))
             {
-                return CreateWalletResult.ReturnFailure();
+                return CreateWalletResult.ReturnFailure("WALLET_EXISTS");
             }
 
             var wallet = new Wallet
