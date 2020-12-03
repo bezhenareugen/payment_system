@@ -80,7 +80,7 @@ namespace PaymentSystem.Server.Application.Transfers.Commands
                 {
                     SourceUsername = user.UserName,
                     DestinationUsername = user.UserName,
-                    Currency = command.Currency,
+                    Currency = destWallet.Currency,
                     Amount = command.Amount,
                     Date = DateTime.Now,
                 };
@@ -116,7 +116,7 @@ namespace PaymentSystem.Server.Application.Transfers.Commands
                 {
                     SourceUsername = user.UserName,
                     DestinationUsername = destinationUser.UserName,
-                    Currency = command.Currency,
+                    Currency = destinationWallet.Currency,
                     Amount = command.Amount,
                     Date = DateTime.Now,
                 };

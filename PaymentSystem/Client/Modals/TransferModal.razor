@@ -48,7 +48,7 @@ else
         <select @bind="transferDto.Id">
             @foreach (var wallet in WalletList)
             {
-                <option @onclick="() => UserName()"  value="@wallet.Id">Wallet in @wallet.Currency</option>
+                <option @onclick="() => UserName(wallet.Currency)"  value="@wallet.Id">Wallet in @wallet.Currency</option>
             }
         </select>
 
@@ -80,6 +80,7 @@ else
     private string placeholderMessage = "Username";
     private bool OwnCardTransferIsActive { get; set; } = false;
     private bool UserCardTransferIsActive { get; set; } = false;
+    private string Curre { get; set; }
 
 
     protected override async Task OnInitializedAsync()
@@ -138,6 +139,8 @@ else
     {
         try
         {
+            CalculateAmount(Curre);
+
             var response = await Http.PostAsJsonAsync("api/transfer", transferDto);
 
             Nav.NavigateTo("wallets");
@@ -161,13 +164,60 @@ else
         return UserCardTransferIsActive = true;
     }
 
-    private void UserName()
+    private void UserName(string curr)
     {
-        transferDto.UserName = "user";
+        transferDto.UserName = "User";
+        Curre = curr;
+
     }
 
     private void ChangeAmountValue(decimal amount)
     {
         Amount = amount;
+    }
+
+
+
+    private decimal CalculateAmount(string curr)
+    {
+
+        switch (transferDto.Currency)
+        {
+            case "USD":
+                switch (curr)
+                {
+                    case "EUR":
+                        transferDto.Amount = transferDto.Amount * 18 / 20;
+                        break;
+                    case "MDL":
+                        transferDto.Amount *= 18;
+                        break;
+                }
+                break;
+            case "EUR":
+                switch (curr)
+                {
+                    case "USD":
+                        transferDto.Amount = transferDto.Amount * 20 / 18;
+                        break;
+                    case "MDL":
+                        transferDto.Amount *= 20;
+                        break;
+                }
+                break;
+            case "MDL":
+                switch (curr)
+                {
+                    case "EUR":
+                        transferDto.Amount /= 20;
+                        break;
+                    case "USD":
+                        transferDto.Amount /= 18;
+                        break;
+                }
+                break;
+        }
+
+        return transferDto.Amount;
     }
 }
