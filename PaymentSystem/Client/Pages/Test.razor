@@ -1,0 +1,63 @@
+﻿@page "/test"
+@inject HttpClient Http
+@using PaymentSystem.Shared
+@using System.Globalization;
+<h3>Test</h3>
+
+
+@if (asd == null)
+{
+    <div>Loading currency API..</div>
+}
+else
+{
+    <tbody>
+        @foreach (var currency in asd)
+        {
+            <tr>
+                <td>@currency.Ccy</td>
+                <td>@currency.Base_Ccy</td>
+                <td>@currency.Buy</td>
+                <td>@currency.Sale</td>
+                <td><button @onclick="() => ConvertToDecimal(currency.Buy)">Convert</button></td>
+            </tr>
+        }
+
+    </tbody>
+    @if (X == null)
+    {
+        <span>asdasdasd</span>
+    }
+    else
+    {
+        <span>@X</span>
+    }
+
+}
+
+
+
+<button @onclick="() => GetCurrencies()">Try</button>
+
+@code {
+    private CultureInfo Culture = new CultureInfo("en-Us");
+
+    private List<PaymentSystem.Shared.CurrencyApi.PrivatBankCurrencies> asd { get; set; } = new List<PaymentSystem.Shared.CurrencyApi.PrivatBankCurrencies>();
+
+    private decimal X { get; set; } = 0;
+
+
+
+
+
+    private async Task GetCurrencies()
+    {
+        asd = await Http.GetFromJsonAsync<List<PaymentSystem.Shared.CurrencyApi.PrivatBankCurrencies>>("https://api.privatbank.ua/p24api/pubinfo?json&exchange&coursid=5");
+    }
+
+    private void ConvertToDecimal(string buy)
+    {
+        X = Convert.ToDecimal(buy, Culture);
+    }
+}
+

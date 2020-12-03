@@ -32,6 +32,19 @@ namespace PaymentSystem.Server.Controllers
             _userManager = userManager;
             _mediator = mediator;
         }
+
+        [HttpGet]
+        [Route("walletcurrency")]
+        public List<string> GetWalletCurrencies()
+        {
+            var userId = _userManager.GetUserId(User);
+            var user = _context.Users.Include(w => w.Wallets).FirstOrDefault(u => u.Id == userId);
+            var walletcurrency = user.Wallets.Select(w => w.Currency).ToList();
+
+            return walletcurrency;        
+        }
+
+
         [HttpGet]
         public async Task<List<Wallet>> GetWallets()
         {

@@ -32,6 +32,7 @@ namespace PaymentSystem.Server.Controllers
             {
                 UserId = _userManager.GetUserId(User),
                 UserName = data.UserName,
+                WalletId = data.Id,
                 Currency = data.Currency,
                 Amount = data.Amount,
             };

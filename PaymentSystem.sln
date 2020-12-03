@@ -9,7 +9,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PaymentSystem.Client", "Pay
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PaymentSystem.Shared", "PaymentSystem\Shared\PaymentSystem.Shared.csproj", "{CCB2F48A-0AE8-406D-A5EE-F2F0A08E9EA4}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PaymentSystem.Server.UnitTests", "PaymentSystem.Server.UnitTests\PaymentSystem.Server.UnitTests.csproj", "{445B2AA2-0773-46A7-AC97-F7AEBE178E6C}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PaymentSystem.Server.UnitTests", "PaymentSystem.Server.UnitTests\PaymentSystem.Server.UnitTests.csproj", "{445B2AA2-0773-46A7-AC97-F7AEBE178E6C}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

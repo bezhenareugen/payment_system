@@ -15,28 +15,53 @@ else
 {
 <div>
     <div class="mb-2">
-        <span>Select currency:</span>
+        <span>Select wallet:</span>
         <select @bind="transferDto.Currency">
             @foreach (var wallet in WalletList)
             {
-                <option @onclick="() => ChangeAmountValue(wallet.Amount)" value="@wallet.Currency">@wallet.Currency</option>
+                <option @onclick="() => ChangeAmountValue(wallet.Amount)" value="@wallet.Currency">Wallet in @wallet.Currency</option>
             }
         </select>
     </div>
     <div class="mb-2">
-        <p class="card-text">Amount: @Amount</p>
+        <p class="card-text"> Current Amount: @Amount</p>
     </div>
-    <div class="input-group p-0 col-md-12 mb-3">
-        <input type="text" @bind="transferDto.UserName" @onfocusout="ValidateUser" class="form-control @RecipientInputClass" placeholder="@placeholderMessage" aria-label="Username" aria-describedby="basic-addon1">
+    <div class="mb-2">
+        <select>
+            <option disabled>Transfer To: </option>
+            <option @onclick="() => OwnIsActive()">Transfer to Own Card</option>
+            <option @onclick="() => ToUserIsActive()">Transfer to User</option>
+        </select>
     </div>
-    <div class="input-group p-0 col-md-12 mb-3">
-        <input type="text" @bind="transferDto.Amount" class="form-control" placeholder="Amount" aria-label="Amount" aria-describedby="basic-addon1">
-    </div>
+    @if (UserCardTransferIsActive)
+    {
+        <div class="input-group p-0 col-md-12 mb-3">
+            <input type="text" @bind="transferDto.UserName" @onfocusout="ValidateUser" class="form-control @RecipientInputClass" placeholder="@placeholderMessage" aria-label="Username" aria-describedby="basic-addon1">
+        </div>
+        <div class="input-group p-0 col-md-12 mb-3">
+            <input type="text" @bind="transferDto.Amount" class="form-control" placeholder="Amount" aria-label="Amount" aria-describedby="basic-addon1">
+        </div>
+    }
+
+    @if (OwnCardTransferIsActive)
+    {
+        <select @bind="transferDto.Id">
+            @foreach (var wallet in WalletList)
+            {
+                <option @onclick="() => UserName()"  value="@wallet.Id">Wallet in @wallet.Currency</option>
+            }
+        </select>
+
+        <div class="input-group p-0 col-md-12 mb-3">
+            <input type="text" @bind="transferDto.Amount" class="form-control" placeholder="Amount" aria-label="Amount" aria-describedby="basic-addon1">
+        </div>
+    }
 
     <button class="btn btn-primary" @onclick="MakeTransfer">Make Transfer</button>
     <button class="btn btn-secondary" @onclick="BlazoredModal.Cancel">Close</button>
 </div>
 }
+
 
 
 
@@ -46,10 +71,15 @@ else
     [Parameter] public string Currency { get; set; }
     [Parameter] public decimal Amount { get; set; }
 
+    private List<string> Curr { get; set; }
     private List<Wallet> WalletList { get; set; }
     public TransferDto transferDto { get; set; } = new TransferDto();
+
+
     private string RecipientInputClass { get; set; }
     private string placeholderMessage = "Username";
+    private bool OwnCardTransferIsActive { get; set; } = false;
+    private bool UserCardTransferIsActive { get; set; } = false;
 
 
     protected override async Task OnInitializedAsync()
@@ -59,6 +89,9 @@ else
             WalletList = await Http.GetFromJsonAsync<List<Wallet>>($"api/wallet");
 
             transferDto.Currency = Currency;
+
+            await LoadCurr();
+
         }
         catch (AccessTokenNotAvailableException exception)
         {
@@ -95,6 +128,12 @@ else
         }
     }
 
+    private async Task LoadCurr()
+    {
+        Curr = await Http.GetFromJsonAsync<List<string>>("api/wallet/walletcurrency");
+    }
+
+
     private async Task MakeTransfer()
     {
         try
@@ -102,12 +141,29 @@ else
             var response = await Http.PostAsJsonAsync("api/transfer", transferDto);
 
             Nav.NavigateTo("wallets");
-         
+
         }
         catch (AccessTokenNotAvailableException exception)
         {
             exception.Redirect();
         }
+    }
+
+    private bool OwnIsActive()
+    {
+        UserCardTransferIsActive = false;
+        return OwnCardTransferIsActive = true;
+    }
+
+    private bool ToUserIsActive()
+    {
+        OwnCardTransferIsActive = false;
+        return UserCardTransferIsActive = true;
+    }
+
+    private void UserName()
+    {
+        transferDto.UserName = "user";
     }
 
     private void ChangeAmountValue(decimal amount)

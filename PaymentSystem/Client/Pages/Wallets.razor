@@ -6,7 +6,7 @@
 @attribute [Authorize]
 @inject HttpClient HttpClient
 @inject NavigationManager navManager
-@inject IModalService Modal 
+@inject IModalService Modal
 
 <style>
     .wallet {
@@ -62,12 +62,47 @@ else
     }
 }
 
+@if (privatBankCurrencies == null)
+{
+    <div>Load Currencies From API...</div>
+}
+else
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th scope="col">Currency</th>
+                <th scope="col">Base Currency</th>
+                <th scope="col">Buy</th>
+                <th scope="col">Sale</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in privatBankCurrencies)
+            {
+                <tr>
+                    <td>@item.Ccy</td>
+                    <td>@item.Base_Ccy</td>
+                    <td>@item.Buy</td>
+                    <td>@item.Sale</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+
+
 @code {
     private CurrencyList CurrencyList;
     private List<string> AllowedCurrencies;
 
+    private List<PaymentSystem.Shared.CurrencyApi.PrivatBankCurrencies> privatBankCurrencies  { get; set; } = new List<PaymentSystem.Shared.CurrencyApi.PrivatBankCurrencies>();
+
     private List<Wallet> WalletList;
     private string Currency;
+
+
 
     protected override async Task OnInitializedAsync()
     {
@@ -75,13 +110,14 @@ else
         await LoadWallets();
         GetAllowedCurrencies();
         var uri = navManager.ToAbsoluteUri(navManager.Uri);
-        if(QueryHelpers.ParseQuery(uri.Query).TryGetValue(Constants.transferSuccess, out var successValue))
+        if (QueryHelpers.ParseQuery(uri.Query).TryGetValue(Constants.transferSuccess, out var successValue))
         {
             if (!Convert.ToBoolean(successValue))
             {
                 Modal.Show<Client.Modals.TransferStatusModal>("Transfer result");
             }
         }
+        await LoadPrivatBankCurrency();
     }
 
     private async Task LoadCurrencies()
@@ -89,6 +125,7 @@ else
         try
         {
             CurrencyList = await HttpClient.GetFromJsonAsync<CurrencyList>("api/currency");
+
         }
         catch (AccessTokenNotAvailableException exception)
         {
@@ -121,6 +158,21 @@ else
         }
 
         Currency = AllowedCurrencies.FirstOrDefault();
+    }
+
+
+    private async Task LoadPrivatBankCurrency()
+    {
+        privatBankCurrencies = await HttpClient.GetFromJsonAsync<List<PaymentSystem.Shared.CurrencyApi.PrivatBankCurrencies>>("https://api.privatbank.ua/p24api/pubinfo?json&exchange&coursid=5");
+
+        if (privatBankCurrencies == null)
+        {
+            throw new Exception();
+        }
+        else
+        {
+            Console.WriteLine(privatBankCurrencies);
+        }
     }
 
     private async Task CreateWallet()
@@ -170,7 +222,7 @@ else
             var modal = Modal.Show<Client.Modals.TransferModal>("Transfer", parameters);
             var result = await modal.Result;
 
-            if(result.Cancelled)
+            if (result.Cancelled)
             {
                 await LoadWallets();
             }
@@ -181,18 +233,4 @@ else
             exception.Redirect();
         }
     }
-
-
-
-@*    private void MakeTransfer(string currency)
-    {
-        try
-        {
-            navManager.NavigateTo($"transfer/{currency}");
-        }
-        catch (AccessTokenNotAvailableException exception)
-        {
-            exception.Redirect();
-        }
-    }
-*@}
+}

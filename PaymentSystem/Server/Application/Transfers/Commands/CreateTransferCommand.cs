@@ -14,6 +14,7 @@ namespace PaymentSystem.Server.Application.Transfers.Commands
     {
         public string UserId { get; set; }
         public string UserName { get; set; }
+        public Guid WalletId { get; set; }
         public string Currency { get; set; }
         public decimal Amount { get; set; }
     }
@@ -63,39 +64,64 @@ namespace PaymentSystem.Server.Application.Transfers.Commands
                 return CreateTransferResult.ReturnFailure();
             }
 
-            var destinationUser = _context.Users.Include(w => w.Wallets).FirstOrDefault(u => u.UserName == command.UserName);
-
-            if(destinationUser == null)
+            if(command.WalletId != null)
             {
-                throw new ResultFailedException();
-            }
+                var destWallet = user.Wallets.FirstOrDefault(w => w.Id == command.WalletId);
 
-            var destinationWallet = destinationUser.Wallets.FirstOrDefault(w => w.Currency == command.Currency);
-
-            if (destinationWallet == null)
-            {
-                destinationWallet = new Models.Wallet
+                if(destWallet == null)
                 {
-                    Amount = 0,
+                    throw new Exception();
+                }
+
+                source.Amount -= command.Amount;
+                destWallet.Amount += command.Amount;
+
+                var transactionUser = new Transaction
+                {
+                    SourceUsername = user.UserName,
+                    DestinationUsername = user.UserName,
                     Currency = command.Currency,
+                    Amount = command.Amount,
+                    Date = DateTime.Now,
                 };
-
-                destinationUser.Wallets.Add(destinationWallet);
+                _context.Add(transactionUser);
             }
-
-            source.Amount -= command.Amount;
-            destinationWallet.Amount += command.Amount;
-
-
-            var transaction = new Transaction
+            else
             {
-                SourceUsername = user.UserName,
-                DestinationUsername = destinationUser.UserName,    
-                Currency = command.Currency,
-                Amount = command.Amount,
-                Date = DateTime.Now,
-            };
-            _context.Add(transaction);
+                var destinationUser = _context.Users.Include(w => w.Wallets).FirstOrDefault(u => u.UserName == command.UserName);
+
+                if (destinationUser == null)
+                {
+                    throw new ResultFailedException();
+                }
+
+                var destinationWallet = destinationUser.Wallets.FirstOrDefault(w => w.Currency == command.Currency);
+
+                if (destinationWallet == null)
+                {
+                    destinationWallet = new Models.Wallet
+                    {
+                        Amount = 0,
+                        Currency = command.Currency,
+                    };
+
+                    destinationUser.Wallets.Add(destinationWallet);
+                }
+
+                source.Amount -= command.Amount;
+                destinationWallet.Amount += command.Amount;
+
+
+                var transaction = new Transaction
+                {
+                    SourceUsername = user.UserName,
+                    DestinationUsername = destinationUser.UserName,
+                    Currency = command.Currency,
+                    Amount = command.Amount,
+                    Date = DateTime.Now,
+                };
+                _context.Add(transaction);
+            }            
             _context.SaveChanges();
 
             return CreateTransferResult.ReturnSuccess();
