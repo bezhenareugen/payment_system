@@ -17,6 +17,7 @@ using PaymentSystem.Server.Models;
 using System.Security.Claims;
 using Blazored.Modal;
 using PaymentSystem.Server.Middleware;
+using PaymentSystem.Server.Bll.Services;
 
 namespace PaymentSystem.Server
 {
@@ -50,6 +51,8 @@ namespace PaymentSystem.Server
             options.ClaimsIdentity.UserIdClaimType = ClaimTypes.NameIdentifier);
 
             services.AddBlazoredModal();
+
+            services.AddScoped<IConverterService, ConverterService>();
 
             services.AddMediatR(typeof(Startup));
 

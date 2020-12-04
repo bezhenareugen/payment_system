@@ -1,5 +1,6 @@
 ﻿using MediatR;
 using Microsoft.EntityFrameworkCore;
+using PaymentSystem.Server.Bll.Services;
 using PaymentSystem.Server.Data;
 using PaymentSystem.Server.Models;
 using System;
@@ -38,12 +39,12 @@ namespace PaymentSystem.Server.Application.Transfers.Commands
     public class CreateTransferCommandHandler : IRequestHandler<CreateTransferCommand, CreateTransferResult>
     {
         private readonly ApplicationDbContext _context;
+        private readonly IConverterService _converterService;
 
-        private decimal convertedAmount;
-
-        public CreateTransferCommandHandler(ApplicationDbContext context)
+        public CreateTransferCommandHandler(ApplicationDbContext context, IConverterService converterService)
         {
             _context = context;
+            _converterService = converterService;
         }
 
         public async Task<CreateTransferResult> Handle(CreateTransferCommand command, CancellationToken cancellationToken)
@@ -75,43 +76,9 @@ namespace PaymentSystem.Server.Application.Transfers.Commands
                 {
                     throw new Exception();
                 }
+                // TODO: Implimenting Currency Value From Bank API...
 
-                switch (command.Currency)
-                {
-                    case "USD":
-                        switch (command.DestinationCurrency)
-                        {
-                            case "EUR":
-                                convertedAmount = command.Amount * 18 / 20;
-                                break;
-                            case "MDL":
-                                convertedAmount = command.Amount * 18;
-                                break;
-                        }
-                        break;
-                    case "EUR":
-                        switch (command.DestinationCurrency)
-                        {
-                            case "USD":
-                                convertedAmount = command.Amount * 20 / 18;
-                                break;
-                            case "MDL":
-                                convertedAmount = command.Amount * 20;
-                                break;
-                        }
-                        break;
-                    case "MDL":
-                        switch (command.DestinationCurrency)
-                        {
-                            case "EUR":
-                                convertedAmount = command.Amount / 20;
-                                break;
-                            case "USD":
-                                convertedAmount = command.Amount / 18;
-                                break;
-                        }
-                        break;
-                }
+                var convertedAmount = _converterService.ConvertedCurrency(source.Currency, command.DestinationCurrency, command.Amount);
 
                 source.Amount -= command.Amount;
                 destWallet.Amount += convertedAmount;
