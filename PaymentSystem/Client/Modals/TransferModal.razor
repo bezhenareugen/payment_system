@@ -70,6 +70,12 @@ else
     [CascadingParameter] BlazoredModalInstance BlazoredModal { get; set; }
     [Parameter] public string Currency { get; set; }
     [Parameter] public decimal Amount { get; set; }
+    [Parameter] public decimal UsdBuy { get; set; }
+    [Parameter] public decimal UsdSale { get; set; }
+    [Parameter] public decimal EurBuy { get; set; }
+    [Parameter] public decimal EurSale { get; set; }
+
+
 
     private List<string> Curr { get; set; }
     private List<Wallet> WalletList { get; set; }
@@ -138,7 +144,7 @@ else
     private async Task MakeTransfer()
     {
         try
-        { 
+        {
             var response = await Http.PostAsJsonAsync("api/transfer", transferDto);
 
             Nav.NavigateTo("wallets");
@@ -174,6 +180,19 @@ else
     {
         Amount = amount;
     }
+
+  @*  private async void GetCurrencyFromApi()
+    {
+        HttpClient client = new HttpClient();
+
+        HttpResponseMessage responseMessage = await client.GetAsync("https://api.privatbank.ua/p24api/pubinfo?json&exchange&coursid=5");
+
+        var responseContent = await responseMessage.Content.ReadAsStringAsync();
+
+        PrivatBankCurrencies parsedResponse = JsonConvert.DeserializeObject<PrivatBankCurrencies>(responseContent);
+
+        privatBankCurrencies = parsedResponse;
+    }*@
 
 
 
