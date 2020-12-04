@@ -16,6 +16,7 @@ namespace PaymentSystem.Server.Application.Transfers.Commands
         public string UserName { get; set; }
         public Guid WalletId { get; set; }
         public string Currency { get; set; }
+        public string DestinationCurrency { get; set; }
         public decimal Amount { get; set; }
     }
 
@@ -37,6 +38,8 @@ namespace PaymentSystem.Server.Application.Transfers.Commands
     public class CreateTransferCommandHandler : IRequestHandler<CreateTransferCommand, CreateTransferResult>
     {
         private readonly ApplicationDbContext _context;
+
+        private decimal convertedAmount;
 
         public CreateTransferCommandHandler(ApplicationDbContext context)
         {
@@ -73,14 +76,51 @@ namespace PaymentSystem.Server.Application.Transfers.Commands
                     throw new Exception();
                 }
 
+                switch (command.Currency)
+                {
+                    case "USD":
+                        switch (command.DestinationCurrency)
+                        {
+                            case "EUR":
+                                convertedAmount = command.Amount * 18 / 20;
+                                break;
+                            case "MDL":
+                                convertedAmount = command.Amount * 18;
+                                break;
+                        }
+                        break;
+                    case "EUR":
+                        switch (command.DestinationCurrency)
+                        {
+                            case "USD":
+                                convertedAmount = command.Amount * 20 / 18;
+                                break;
+                            case "MDL":
+                                convertedAmount = command.Amount * 20;
+                                break;
+                        }
+                        break;
+                    case "MDL":
+                        switch (command.DestinationCurrency)
+                        {
+                            case "EUR":
+                                convertedAmount = command.Amount / 20;
+                                break;
+                            case "USD":
+                                convertedAmount = command.Amount / 18;
+                                break;
+                        }
+                        break;
+                }
+
                 source.Amount -= command.Amount;
-                destWallet.Amount += command.Amount;
+                destWallet.Amount += convertedAmount;
 
                 var transactionUser = new Transaction
                 {
                     SourceUsername = user.UserName,
                     DestinationUsername = user.UserName,
-                    Currency = destWallet.Currency,
+                    Currency = command.Currency,
                     Amount = command.Amount,
                     Date = DateTime.Now,
                 };
@@ -116,7 +156,7 @@ namespace PaymentSystem.Server.Application.Transfers.Commands
                 {
                     SourceUsername = user.UserName,
                     DestinationUsername = destinationUser.UserName,
-                    Currency = destinationWallet.Currency,
+                    Currency = command.Currency,
                     Amount = command.Amount,
                     Date = DateTime.Now,
                 };

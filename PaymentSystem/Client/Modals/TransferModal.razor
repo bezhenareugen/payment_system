@@ -138,9 +138,7 @@ else
     private async Task MakeTransfer()
     {
         try
-        {
-            CalculateAmount(Curre);
-
+        { 
             var response = await Http.PostAsJsonAsync("api/transfer", transferDto);
 
             Nav.NavigateTo("wallets");
@@ -167,6 +165,7 @@ else
     private void UserName(string curr)
     {
         transferDto.UserName = "User";
+        transferDto.DestinationCurrency = curr;
         Curre = curr;
 
     }
@@ -178,7 +177,7 @@ else
 
 
 
-    private decimal CalculateAmount(string curr)
+    @*private decimal CalculateAmount(string curr)
     {
 
         switch (transferDto.Currency)
@@ -219,5 +218,5 @@ else
         }
 
         return transferDto.Amount;
-    }
+    }*@
 }

@@ -9,6 +9,7 @@ namespace PaymentSystem.Shared
         public Guid Id { get; set; }
         public string UserName { get; set; }
         public decimal Amount { get; set; }
+        public string DestinationCurrency { get; set; }
         public string Currency { get; set; }
     }
 }

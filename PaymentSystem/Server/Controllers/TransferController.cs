@@ -34,6 +34,7 @@ namespace PaymentSystem.Server.Controllers
                 UserName = data.UserName,
                 WalletId = data.Id,
                 Currency = data.Currency,
+                DestinationCurrency = data.DestinationCurrency,
                 Amount = data.Amount,
             };
 
