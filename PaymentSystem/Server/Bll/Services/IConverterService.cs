@@ -7,6 +7,6 @@ namespace PaymentSystem.Server.Bll.Services
 {
     public interface IConverterService
     {
-        public decimal ConvertedCurrency(string sourceCurrency, string destinationCurrency, decimal transferAmount);       
+        public Task<decimal> ConvertedCurrencyAsync(string sourceCurrency, string destinationCurrency, decimal transferAmount);       
     }
 }

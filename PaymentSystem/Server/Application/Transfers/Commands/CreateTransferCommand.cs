@@ -78,10 +78,10 @@ namespace PaymentSystem.Server.Application.Transfers.Commands
                 }
                 // TODO: Implimenting Currency Value From Bank API...
 
-                var convertedAmount = _converterService.ConvertedCurrency(source.Currency, command.DestinationCurrency, command.Amount);
+                var convertedAmount = _converterService.ConvertedCurrencyAsync(source.Currency, command.DestinationCurrency, command.Amount);
 
                 source.Amount -= command.Amount;
-                destWallet.Amount += convertedAmount;
+                destWallet.Amount += convertedAmount.Result;
 
                 var transactionUser = new Transaction
                 {
