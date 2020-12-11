@@ -20,5 +20,6 @@ namespace PaymentSystem.Server.Data
 
         public DbSet<Wallet> Wallets { get; set; }
         public DbSet<Transaction> Transactions { get; set; }
+        public DbSet<PrivateBankCurrencyApi> PrivateBankCurrencies { get; set; }
     }
 }
