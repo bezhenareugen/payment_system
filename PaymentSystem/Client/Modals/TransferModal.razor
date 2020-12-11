@@ -16,7 +16,7 @@ else
 <div>
     <div class="mb-2">
         <span>Select currency:</span>
-        <select @bind="transferDto.Currency">
+        <select @bind="transferDto.SourceCurrency">
             @foreach (var wallet in WalletList)
             {
                 <option @onclick="() => ChangeAmountValue(wallet.Amount)" value="@wallet.Currency">@wallet.Currency</option>
@@ -58,7 +58,7 @@ else
         {
             WalletList = await Http.GetFromJsonAsync<List<Wallet>>($"api/wallet");
 
-            transferDto.Currency = Currency;
+            transferDto.SourceCurrency = Currency;
         }
         catch (AccessTokenNotAvailableException exception)
         {

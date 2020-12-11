@@ -2,6 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using PaymentSystem.Server.Data;
 using PaymentSystem.Server.Models;
+using PaymentSystem.Server.Services.ConverterOfCurrencyService;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -14,7 +15,8 @@ namespace PaymentSystem.Server.Application.Transfers.Commands
     {
         public string UserId { get; set; }
         public string UserName { get; set; }
-        public string Currency { get; set; }
+        public string SourceCurrency { get; set; }
+        public string DestinationCurrency { get; set; }
         public decimal Amount { get; set; }
     }
 
@@ -36,10 +38,12 @@ namespace PaymentSystem.Server.Application.Transfers.Commands
     public class CreateTransferCommandHandler : IRequestHandler<CreateTransferCommand, CreateTransferResult>
     {
         private readonly ApplicationDbContext _context;
+        private readonly IConverterOfCurrency _converterOfCurrency;
 
-        public CreateTransferCommandHandler(ApplicationDbContext context)
+        public CreateTransferCommandHandler(ApplicationDbContext context, IConverterOfCurrency converterOfCurrency)
         {
             _context = context;
+            _converterOfCurrency = converterOfCurrency;
         }
 
         public async Task<CreateTransferResult> Handle(CreateTransferCommand command, CancellationToken cancellationToken)
@@ -51,12 +55,12 @@ namespace PaymentSystem.Server.Application.Transfers.Commands
 
             var user = await _context.Users.Include(u => u.Wallets).FirstOrDefaultAsync(u => u.Id == command.UserId);
 
-            if (!user.Wallets.Any(w => w.Currency == command.Currency))
+            if (!user.Wallets.Any(w => w.Currency == command.SourceCurrency))
             {
                 return CreateTransferResult.ReturnFailure();
             }
 
-            var source =  user.Wallets.FirstOrDefault(w => w.Currency == command.Currency);
+            var source =  user.Wallets.FirstOrDefault(w => w.Currency == command.SourceCurrency);
 
             if (source.Amount < command.Amount)
             {
@@ -70,28 +74,36 @@ namespace PaymentSystem.Server.Application.Transfers.Commands
                 throw new ResultFailedException();
             }
 
-            var destinationWallet = destinationUser.Wallets.FirstOrDefault(w => w.Currency == command.Currency);
+            if(command.DestinationCurrency != null)
+            {
+                throw new Exception();
+            }
+
+            var destinationWallet = destinationUser.Wallets.FirstOrDefault(w => w.Currency == command.SourceCurrency);
+
+
+            var convertedAmount = _converterOfCurrency.ConvertCurrency(command.SourceCurrency, command.DestinationCurrency, command.Amount);
 
             if (destinationWallet == null)
             {
                 destinationWallet = new Models.Wallet
                 {
                     Amount = 0,
-                    Currency = command.Currency,
+                    Currency = command.SourceCurrency,
                 };
 
                 destinationUser.Wallets.Add(destinationWallet);
             }
 
             source.Amount -= command.Amount;
-            destinationWallet.Amount += command.Amount;
+            destinationWallet.Amount += convertedAmount;
 
 
             var transaction = new Transaction
             {
                 SourceUsername = user.UserName,
                 DestinationUsername = destinationUser.UserName,    
-                Currency = command.Currency,
+                Currency = command.SourceCurrency,
                 Amount = command.Amount,
                 Date = DateTime.Now,
             };

@@ -8,6 +8,7 @@ namespace PaymentSystem.Shared
     {
         public string UserName { get; set; }
         public decimal Amount { get; set; }
-        public string Currency { get; set; }
+        public string SourceCurrency { get; set; }
+        public string DestinationCurrency { get; set; }
     }
 }

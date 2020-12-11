@@ -21,6 +21,7 @@ using Hangfire;
 using Hangfire.MemoryStorage;
 using System;
 using PaymentSystem.Server.Services;
+using PaymentSystem.Server.Services.ConverterOfCurrencyService;
 
 namespace PaymentSystem.Server
 {
@@ -59,8 +60,9 @@ namespace PaymentSystem.Server
                 options.UseMemoryStorage();
             });
 
-            services.AddScoped<IService, Service>();
+           
             services.AddScoped<IGetDataFromApi, GetDataFromApi>();
+            services.AddScoped<IConverterOfCurrency, ConverterOfCurrency>();
 
             services.AddBlazoredModal();
 
@@ -92,10 +94,10 @@ namespace PaymentSystem.Server
 
             app.UseHangfireServer();
             app.UseHangfireDashboard("/dash");
-            recurringJobManager.AddOrUpdate(
+          /*  recurringJobManager.AddOrUpdate(
                 "Hello Msg",
                 () => getDataFromApi.GetData(),
-                 " * * * * * "); 
+                 " * * * * * "); */
 
             app.UseHttpsRedirection();
             app.UseBlazorFrameworkFiles();
