@@ -33,6 +33,7 @@ namespace PaymentSystem.Server.Controllers
                 UserId = _userManager.GetUserId(User),
                 UserName = data.UserName,
                 SourceCurrency = data.SourceCurrency,
+                DestinationCurrency = data.DestinationCurrency,
                 Amount = data.Amount,
             };
 

@@ -26,13 +26,40 @@ else
     <div class="mb-2">
         <p class="card-text">Amount: @Amount</p>
     </div>
-    <div class="input-group p-0 col-md-12 mb-3">
-        <input type="text" @bind="transferDto.UserName" @onfocusout="ValidateUser" class="form-control @RecipientInputClass" placeholder="@placeholderMessage" aria-label="Username" aria-describedby="basic-addon1">
-    </div>
-    <div class="input-group p-0 col-md-12 mb-3">
-        <input type="text" @bind="transferDto.Amount" class="form-control" placeholder="Amount" aria-label="Amount" aria-describedby="basic-addon1">
+    <div>
+        <select>
+            <option selected disabled>Select transfer methods</option>
+            <option @onclick="TransferToOwnWallet">Transfer to Own Wallet</option>
+            <option @onclick="TransferToUserWallet">Transfer to User</option>
+        </select>
     </div>
 
+    @if (TransferToOwn)
+    {
+        <div class="mb-2">
+            <span>Select currency:</span>
+            <select @bind="transferDto.DestinationCurrency">
+                @foreach (var wallet in WalletList.FindAll(x => x.Currency != transferDto.SourceCurrency))
+                {
+                    <option @onclick="() => SelectDestinationWallet(wallet.Currency)" value="@wallet.Currency">
+                        @wallet.Currency
+                    </option>
+                }
+            </select>
+        </div>
+        <div>
+            <input type="number" @bind="transferDto.Amount" />
+        </div>
+    }
+    @if (TransferToUser)
+    {
+        <div class="input-group p-0 col-md-12 mb-3">
+            <input type="text" @bind="transferDto.UserName" @onfocusout="ValidateUser" class="form-control @RecipientInputClass" placeholder="@placeholderMessage" aria-label="Username" aria-describedby="basic-addon1">
+        </div>
+        <div class="input-group p-0 col-md-12 mb-3">
+            <input type="text" @bind="transferDto.Amount" class="form-control" placeholder="Amount" aria-label="Amount" aria-describedby="basic-addon1">
+        </div>
+    }
     <button class="btn btn-primary" @onclick="MakeTransfer">Make Transfer</button>
     <button class="btn btn-secondary" @onclick="BlazoredModal.Cancel">Close</button>
 </div>
@@ -48,8 +75,11 @@ else
 
     private List<Wallet> WalletList { get; set; }
     public TransferDto transferDto { get; set; } = new TransferDto();
+    private bool TransferToUser { get; set; } = false;
+    private bool TransferToOwn { get; set; } = false;
     private string RecipientInputClass { get; set; }
     private string placeholderMessage = "Username";
+
 
 
     protected override async Task OnInitializedAsync()
@@ -59,6 +89,7 @@ else
             WalletList = await Http.GetFromJsonAsync<List<Wallet>>($"api/wallet");
 
             transferDto.SourceCurrency = Currency;
+
         }
         catch (AccessTokenNotAvailableException exception)
         {
@@ -102,7 +133,7 @@ else
             var response = await Http.PostAsJsonAsync("api/transfer", transferDto);
 
             Nav.NavigateTo("wallets");
-         
+
         }
         catch (AccessTokenNotAvailableException exception)
         {
@@ -113,5 +144,24 @@ else
     private void ChangeAmountValue(decimal amount)
     {
         Amount = amount;
+    }
+
+
+
+    private void TransferToOwnWallet()
+    {
+        TransferToUser = false;
+        TransferToOwn = true;
+    }
+
+    private void TransferToUserWallet ()
+    {
+        TransferToUser = true;
+        TransferToOwn = false;
+    }
+
+    private void SelectDestinationWallet(string destCurrency)
+    {
+        transferDto.UserName = destCurrency;
     }
 }

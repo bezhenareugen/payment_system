@@ -30,10 +30,10 @@ namespace PaymentSystem.Server.Services
 
             var entity = parsedResponse.Select(x => new PrivateBankCurrencyApi
             {
-                Ccy = x.Ccy,
-                Base_Ccy = x.Base_Ccy,
-                Buy = x.Buy,
-                Sale = x.Sale,
+               Ccy = x.Ccy,
+               Base_Ccy = x.Base_Ccy,
+               Buy = Convert.ToDecimal(x.Buy),
+               Sale = Convert.ToDecimal(x.Sale),
             });
 
             _context.AddRange(entity);

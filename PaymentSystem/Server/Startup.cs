@@ -97,7 +97,7 @@ namespace PaymentSystem.Server
           /*  recurringJobManager.AddOrUpdate(
                 "Hello Msg",
                 () => getDataFromApi.GetData(),
-                 " * * * * * "); */
+                 " * * * * * ");*/
 
             app.UseHttpsRedirection();
             app.UseBlazorFrameworkFiles();

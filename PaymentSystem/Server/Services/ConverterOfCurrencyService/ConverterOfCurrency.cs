@@ -31,16 +31,16 @@ namespace PaymentSystem.Server.Services.ConverterOfCurrencyService
                     switch (destCurrency)
                     {
                         case "EUR":
-                            convertedAmount = amount / Convert.ToDecimal(usd.Buy) * Convert.ToDecimal(eur.Sale);
+                            convertedAmount = amount / usd.Buy * eur.Sale;
                             break;
                         case "RUR":
-                            convertedAmount = amount / Convert.ToDecimal(usd.Buy) * Convert.ToDecimal(eur.Sale);
+                            convertedAmount = amount / usd.Buy * eur.Sale;
                             break;
                         case "BTC":
-                            convertedAmount = amount / Convert.ToDecimal(usd.Buy) * Convert.ToDecimal(btc.Sale);
+                            convertedAmount = amount * btc.Sale;
                             break;
                         case "UAH":
-                            convertedAmount = amount * Convert.ToDecimal(usd.Buy);
+                            convertedAmount = amount * usd.Buy;
                             break;
                         case "USD":
                             convertedAmount = amount;
@@ -49,20 +49,21 @@ namespace PaymentSystem.Server.Services.ConverterOfCurrencyService
                             break;
                     }
                     break;
+
                 case "EUR":
                     switch (destCurrency)
                     {
                         case "USD":
-                            convertedAmount = amount / Convert.ToDecimal(eur.Buy) * Convert.ToDecimal(usd.Sale);
+                            convertedAmount = amount / eur.Buy * usd.Sale;
                             break;
                         case "RUR":
-                            convertedAmount = amount / Convert.ToDecimal(eur.Buy) * Convert.ToDecimal(rur.Sale);
+                            convertedAmount = amount / eur.Buy * rur.Sale;
                             break;
                         case "BTC":
-                            convertedAmount = amount / Convert.ToDecimal(eur.Buy) * Convert.ToDecimal(btc.Sale);
+                            convertedAmount = amount / eur.Buy * usd.Sale *  btc.Sale;
                             break;
                         case "UAH":
-                            convertedAmount = amount * Convert.ToDecimal(eur.Buy);
+                            convertedAmount = amount * eur.Buy;
                             break;
                         case "EUR":
                             convertedAmount = amount;
@@ -76,46 +77,49 @@ namespace PaymentSystem.Server.Services.ConverterOfCurrencyService
                     switch (destCurrency)
                     {
                         case "EUR":
-                            convertedAmount = amount / Convert.ToDecimal(rur.Buy) * Convert.ToDecimal(eur.Sale);
+                            convertedAmount = amount / rur.Buy * eur.Sale;
                             break;
                         case "RUR":
                             convertedAmount = amount;
                             break;
                         case "BTC":
-                            convertedAmount = amount / Convert.ToDecimal(rur.Buy) * Convert.ToDecimal(btc.Sale);
+                            convertedAmount = amount / rur.Buy * usd.Sale * btc.Sale;
                             break;
                         case "UAH":
-                            convertedAmount = amount * Convert.ToDecimal(rur.Buy);
+                            convertedAmount = amount * rur.Buy;
 
                             break;
                         case "USD":
-                            convertedAmount = amount / Convert.ToDecimal(rur.Buy) * Convert.ToDecimal(usd.Sale);
+                            convertedAmount = amount / rur.Buy * usd.Sale;
                             break;
                         default:
                             break;
                     }
                     break;
+
                 case "BTC":
                     switch (destCurrency)
                     {
                         case "USD":
-                            convertedAmount = amount / Convert.ToDecimal(btc.Buy) * Convert.ToDecimal(usd.Sale);
+                            convertedAmount = amount * btc.Sale;
                             break;
                         case "RUR":
-                            convertedAmount = amount / Convert.ToDecimal(btc.Buy) * Convert.ToDecimal(rur.Sale);
+                            convertedAmount = amount / btc.Sale * usd.Buy * rur.Sale;
                             break;
                         case "BTC":
                             convertedAmount = amount;
                             break;
                         case "UAH":
-                            convertedAmount = amount * Convert.ToDecimal(btc.Buy);
+                            convertedAmount = amount * btc.Sale * usd.Buy;
                             break;
                         case "EUR":
-                            convertedAmount = amount / Convert.ToDecimal(btc.Buy) * Convert.ToDecimal(eur.Sale);
+                            convertedAmount = amount / btc.Sale * usd.Buy * eur.Sale;
                             break;
                         default:
                             break;
                     }
+                    break;
+                default:
                     break;
             }
 

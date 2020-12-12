@@ -15,8 +15,8 @@ namespace PaymentSystem.Server
             {
                 "EUR",
                 "USD",
-                "MDL",
-                "EC"
+                "UAH",
+                "BTC"
             };
         }
     }
