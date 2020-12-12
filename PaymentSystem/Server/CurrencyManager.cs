@@ -16,7 +16,8 @@ namespace PaymentSystem.Server
                 "EUR",
                 "USD",
                 "UAH",
-                "BTC"
+                "RUR",
+                "BTC",
             };
         }
     }

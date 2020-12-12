@@ -26,6 +26,15 @@ namespace PaymentSystem.Server.Controllers
             _userManager = userManager;
         }
         
+        [HttpGet]
+        [Route("username")]
+        public string Username()
+        {
+            var userId = _userManager.GetUserId(User);
+            var userName = _context.Users.FirstOrDefault(u => u.Id == userId).UserName;
+
+            return userName;
+        }
 
         [HttpGet]
         [Route("{username}/validate")]

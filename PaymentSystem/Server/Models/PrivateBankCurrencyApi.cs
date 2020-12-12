@@ -10,5 +10,6 @@ namespace PaymentSystem.Server.Models
         public string Base_Ccy { get; set; }
         public decimal Buy { get; set; }
         public decimal Sale { get; set; }
+        public DateTime CreateDate { get; set; }
     }
 }

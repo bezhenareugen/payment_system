@@ -34,6 +34,7 @@ namespace PaymentSystem.Server.Services
                Base_Ccy = x.Base_Ccy,
                Buy = Convert.ToDecimal(x.Buy),
                Sale = Convert.ToDecimal(x.Sale),
+               CreateDate = DateTime.Now,
             });
 
             _context.AddRange(entity);

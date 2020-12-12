@@ -11,10 +11,10 @@
         <div class="mr-1">
             <p class="m-0">Show</p>
         </div>
-        <select @bind="itemsPerPage" @onclick="() => LoadTransactions(pageNumber)">
-            <option value="3">3</option>
-            <option value="6">6</option>
-            <option value="8">8</option>
+        <select @bind="itemsPerPage">
+            <option  @onclick="() => ChekPNum()" value="3">3</option>
+            <option  @onclick="() => ChekPNum()" value="6">6</option>
+            <option  @onclick="() => ChekPNum()" value="8">8</option>
         </select>
     </div>
    
@@ -58,6 +58,9 @@ else
 
     <nav aria-label="Page navigation example">
         <ul class="pagination justify-content-end">
+            <li class="page-item pagination__cursor @(pageNumber == 1 ? "disabled" : "")">
+                <a class="page-link " @onclick="() => FirstPage()">First</a>
+            </li>
             <li class="page-item pagination__cursor  @(pageNumber == 1 ? "disabled" : "")">
                 <a class="page-link" @onclick="() => PreviousPage()">Previous</a>
             </li>
@@ -68,6 +71,9 @@ else
             }
             <li class="page-item pagination__cursor @(pageNumber == PagenetedTransfer.MaxPageNumber ? "disabled" : "")">
                 <a class="page-link" @onclick="() => NextPage()">Next</a>
+            </li>
+            <li class="page-item pagination__cursor @(pageNumber == PagenetedTransfer.MaxPageNumber ? "disabled" : "")">
+                <a class="page-link"  @onclick="() => LastPage()">Last</a>
             </li>
         </ul>
     </nav>
@@ -107,8 +113,9 @@ else
     private async Task LoadTransactions(int pNum)
     {
         try
-        {
+        {         
             PagenetedTransfer = await Http.GetFromJsonAsync<PaginetedTransferHistory>($"api/transferhistory?sortDir={SortDir}&sortBy={SortBy}&pageNumber={pNum}&itemsPerPage={itemsPerPage}");
+
             pageNumber = pNum;
         }
         catch (AccessTokenNotAvailableException exception)
@@ -118,9 +125,24 @@ else
     }
 
 
+    private async Task ChekPNum()
+    {
+        if (pageNumber > (PagenetedTransfer.TransactionsCount / itemsPerPage))
+        {
+            pageNumber = PagenetedTransfer.TransactionsCount / itemsPerPage;
+
+            await LoadTransactions(pageNumber);
+        }
+        else
+        {
+            await LoadTransactions(pageNumber);
+        }
+    }
+
     private async Task ChangePage(int cureentPage)
     {
         pageNumber = cureentPage;
+
         await LoadTransactions(pageNumber);
     }
 
@@ -137,6 +159,7 @@ else
         try
         {
             SortDirFilter();
+
             await LoadTransactions(pageNumber);
         }
         catch (AccessTokenNotAvailableException exception)
@@ -179,12 +202,20 @@ else
         }
     }
 
+    private async Task FirstPage()
+    {
+        pageNumber = 1;
+
+        await LoadTransactions(pageNumber);
+    }
+
 
     private async Task NextPage()
     {
         if (pageNumber < PagenetedTransfer.MaxPageNumber)
         {
             pageNumber += 1;
+
             await LoadTransactions(pageNumber);
         }
     }
@@ -197,5 +228,12 @@ else
             pageNumber -= 1;
             await LoadTransactions(pageNumber);
         }
+    }
+
+    private async Task LastPage()
+    {
+        pageNumber = Convert.ToInt32(PagenetedTransfer.MaxPageNumber);
+
+        await LoadTransactions(pageNumber);
     }
 }

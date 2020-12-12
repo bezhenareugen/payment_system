@@ -36,7 +36,7 @@ else
 
     @if (TransferToOwn)
     {
-        <div class="mb-2">
+        <div class="mb-4">
             <span>Select currency:</span>
             <select @bind="transferDto.DestinationCurrency">
                 <option selected disabled>Select Wallet</option>
@@ -57,7 +57,7 @@ else
         <div class="input-group p-0 col-md-12 mb-3">
             <input type="text" @bind="transferDto.UserName" @onfocusout="ValidateUser" class="form-control @RecipientInputClass" placeholder="@placeholderMessage" aria-label="Username" aria-describedby="basic-addon1">
         </div>
-        <div class="input-group p-0 col-md-12 mb-3">
+        <div class="input-group p-0 col-md-12 mb-4">
             <input type="text" @bind="transferDto.Amount" class="form-control" placeholder="Amount" aria-label="Amount" aria-describedby="basic-addon1">
         </div>
     }
@@ -148,7 +148,6 @@ else
     }
 
 
-
     private void TransferToOwnWallet()
     {
         TransferToUser = false;
@@ -163,6 +162,6 @@ else
 
     private void SelectDestinationWallet(string destCurrency)
     {
-        transferDto.UserName = destCurrency + " Wallet";
+        transferDto.UserName = $"to {destCurrency} Wallet";
     }
 }
