@@ -39,6 +39,7 @@ else
         <div class="mb-2">
             <span>Select currency:</span>
             <select @bind="transferDto.DestinationCurrency">
+                <option selected disabled>Select Wallet</option>
                 @foreach (var wallet in WalletList.FindAll(x => x.Currency != transferDto.SourceCurrency))
                 {
                     <option @onclick="() => SelectDestinationWallet(wallet.Currency)" value="@wallet.Currency">
@@ -127,7 +128,7 @@ else
     }
 
     private async Task MakeTransfer()
-    {
+    {     
         try
         {
             var response = await Http.PostAsJsonAsync("api/transfer", transferDto);
@@ -162,6 +163,6 @@ else
 
     private void SelectDestinationWallet(string destCurrency)
     {
-        transferDto.UserName = destCurrency;
+        transferDto.UserName = destCurrency + " Wallet";
     }
 }

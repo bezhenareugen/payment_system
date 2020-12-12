@@ -94,10 +94,10 @@ namespace PaymentSystem.Server
 
             app.UseHangfireServer();
             app.UseHangfireDashboard("/dash");
-          /*  recurringJobManager.AddOrUpdate(
+            recurringJobManager.AddOrUpdate(
                 "Hello Msg",
                 () => getDataFromApi.GetData(),
-                 " * * * * * ");*/
+                " 0 * * * * ");
 
             app.UseHttpsRedirection();
             app.UseBlazorFrameworkFiles();

@@ -16,12 +16,14 @@ namespace PaymentSystem.Server.Services.ConverterOfCurrencyService
         }
         public decimal ConvertCurrency(string sourceCurrency, string destCurrency, decimal amount)
         {
-            var bankCurrency = _context.PrivateBankCurrencies.ToList();
+            var currencyList = _context.PrivateBankCurrencies.ToList();
 
-            var usd = bankCurrency.Find(x => x.Ccy == "USD");
-            var eur = bankCurrency.Find(x => x.Ccy == "EUR");
-            var rur = bankCurrency.Find(x => x.Ccy == "RUR");
-            var btc = bankCurrency.Find(x => x.Ccy == "BTC");
+            var bankCurrency = currencyList.Skip(currencyList.Count - 4).ToList();
+
+            var usd = currencyList.Find(x => x.Ccy == "USD");
+            var eur = currencyList.Find(x => x.Ccy == "EUR");
+            var rur = currencyList.Find(x => x.Ccy == "RUR");
+            var btc = currencyList.Find(x => x.Ccy == "BTC");
 
             decimal convertedAmount = 0;
 
