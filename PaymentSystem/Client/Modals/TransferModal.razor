@@ -128,9 +128,15 @@ else
     }
 
     private async Task MakeTransfer()
-    {     
+    {
         try
         {
+            if(transferDto.SourceCurrency == transferDto.DestinationCurrency)
+            {
+                //TODO: withdraw to the user message
+                return;
+            }
+
             var response = await Http.PostAsJsonAsync("api/transfer", transferDto);
 
             Nav.NavigateTo("wallets");

@@ -69,6 +69,10 @@ namespace PaymentSystem.Server.Application.Transfers.Commands
 
             if (command.DestinationCurrency != null)
             {
+                if(command.SourceCurrency == command.DestinationCurrency)
+                {
+                    throw new Exception();
+                }
 
                 var userDestinationOWnWallet = user.Wallets.FirstOrDefault(w => w.Currency == command.DestinationCurrency);
 
