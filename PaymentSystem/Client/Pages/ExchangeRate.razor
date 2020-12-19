@@ -1,0 +1,46 @@
+﻿@page "/exchangerate"
+@inject HttpClient Http
+@using PaymentSystem.Shared
+
+<h3>ExchangeRate</h3>
+
+@if (CurrencyList == null)
+{
+    <div>Loading...</div>
+}
+else
+{
+<div>
+    <table class="table col-md-4">
+        <thead>
+            <tr>
+                <th scope="col">Currency</th>
+                <th scope="col">Base Currency</th>
+                <th scope="col">Buy</th>
+                <th scope="col">Sale</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in CurrencyList)
+            {
+                <tr>
+                    <td>@item.Ccy</td>
+                    <td>@item.Base_Ccy</td>
+                    <td>@item.Buy</td>
+                    <td>@item.Sale</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+}
+
+@code {
+
+    private List<PrivateBankCurrencyApi> CurrencyList { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        CurrencyList = await Http.GetFromJsonAsync<List<PrivateBankCurrencyApi>>("api/exchange");
+    }
+}

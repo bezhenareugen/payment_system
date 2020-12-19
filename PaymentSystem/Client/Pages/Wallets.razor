@@ -1,76 +1,142 @@
 ﻿@page "/wallets"
+@using PaymentSystem.Shared
 @using Microsoft.AspNetCore.Authorization
 @using Microsoft.AspNetCore.Components.WebAssembly.Authentication
-@using PaymentSystem.Shared
+@using Microsoft.AspNetCore.WebUtilities
 @attribute [Authorize]
-@inject HttpClient Http
-
-
-
-<h3>Wallets</h3>
+@inject HttpClient HttpClient
+@inject NavigationManager navManager
+@inject IModalService Modal 
 
 <style>
-    .wallets {
+    .wallet {
         width: 250px;
-        border: 1px solid black;
+        border: 1px solid #555;
         border-radius: 5px;
         margin: 10px;
         padding: 10px;
-
     }
 </style>
 
-@if (WalletList == null || WalletList.Length == 0)
+<h3>Wallets</h3>
+
+@if (WalletList == null)
 {
     <div>Loading...</div>
 }
 else
 {
-    @foreach (var wallet in WalletList)
-    {
-        <div class="wallets">
-            <div>@wallet.Id</div>
-            <div>
-                <span>@wallet.Amount</span>
-
-                <span>@wallet.Currency</span>
+    <div class="d-flex flex-wrap">
+        @foreach (var wallet in WalletList)
+        {
+            <div class="card m-2" style="width: 18rem;">
+                <div class="card-body">
+                    <h5 class="card-title">Wallet</h5>
+                    <p class="card-text">Currency: @wallet.Currency</p>
+                    <p class="card-text">Amount: @wallet.Amount</p>
+                    <button class="btn btn-primary" @onclick="() => MakeTransfer(wallet.Currency, wallet.Amount)">Make transfer</button>
+                    <button class="btn btn-danger" @onclick="() => DeleteWallet(wallet.Id)">Delete wallet</button>
+                </div>
             </div>
-            <button @onclick="() => DeleteWallet(wallet.Id)">Delete Wallet</button>
+        }
+    </div>
+
+    @if (AllowedCurrencies.Any())
+    {
+        <div class="mt-3">
+            <h3>Create a new wallet</h3>
+
+            <select @bind="Currency">
+                @foreach (var currency in AllowedCurrencies)
+                {
+                    <option value="@currency">@currency</option>
+                }
+            </select>
+
+            <button class="btn btn-primary" @onclick="() => CreateWallet()">Create wallet</button>
         </div>
+    }
+    else
+    {
+        <div>You already have one wallet in each currency.</div>
     }
 }
 
-
-<div>
-    <h3>Create a new wallet</h3>
-    <input type="text" placeholder="Currency" @bind="Currency" />
-
-    <button @onclick="() => CreateWallet()">Create</button>
-</div>
-
-
-
 @code {
-    private Wallet[] WalletList;
+    private CurrencyList CurrencyList;
+    private List<string> AllowedCurrencies;
+
+    private List<Wallet> WalletList;
     private string Currency;
 
     protected override async Task OnInitializedAsync()
     {
+        await LoadCurrencies();
+        await LoadWallets();
+        GetAllowedCurrencies();
+        var uri = navManager.ToAbsoluteUri(navManager.Uri);
+        if(QueryHelpers.ParseQuery(uri.Query).TryGetValue(Constants.transferSuccess, out var successValue))
+        {
+            if (!Convert.ToBoolean(successValue))
+            {
+                Modal.Show<Client.Modals.TransferStatusModal>("Transfer result");
+            }
+        }
+    }
+
+    private async Task LoadCurrencies()
+    {
         try
         {
-            WalletList = await Http.GetFromJsonAsync<Wallet[]>("api/wallet");
+            CurrencyList = await HttpClient.GetFromJsonAsync<CurrencyList>("api/currency");
         }
         catch (AccessTokenNotAvailableException exception)
         {
             exception.Redirect();
         }
+    }
+
+    private async Task LoadWallets()
+    {
+        try
+        {
+            WalletList = await HttpClient.GetFromJsonAsync<List<Wallet>>("api/wallet");
+        }
+        catch (AccessTokenNotAvailableException exception)
+        {
+            exception.Redirect();
+        }
+    }
+
+    private void GetAllowedCurrencies()
+    {
+        AllowedCurrencies = new List<string>();
+
+        foreach (var currency in CurrencyList.Currencies)
+        {
+            if (!WalletList.Any(x => x.Currency == currency))
+            {
+                AllowedCurrencies.Add(currency);
+            }
+        }
+
+        Currency = AllowedCurrencies.FirstOrDefault();
     }
 
     private async Task CreateWallet()
     {
         try
         {
-            await Http.PostAsJsonAsync("api/wallet", Currency);
+            if (string.IsNullOrWhiteSpace(Currency))
+                return;
+
+            var response = await HttpClient.PostAsJsonAsync("api/wallet/", Currency);
+
+            if (response.IsSuccessStatusCode)
+            {
+                await LoadWallets();
+                GetAllowedCurrencies();
+            }
         }
         catch (AccessTokenNotAvailableException exception)
         {
@@ -78,15 +144,55 @@ else
         }
     }
 
-    private void DeleteWallet(Guid id)
+    private async Task DeleteWallet(Guid id)
     {
         try
         {
-            Http.DeleteAsync("api/wallet/" + id);
+            await HttpClient.DeleteAsync("api/wallet/" + id);
+            await LoadWallets();
+            GetAllowedCurrencies();
         }
         catch (AccessTokenNotAvailableException exception)
         {
             exception.Redirect();
         }
     }
-}
+
+    private async Task MakeTransfer(string currency, decimal amount)
+    {
+        try
+        {
+            var parameters = new ModalParameters();
+
+            parameters.Add(nameof(Client.Modals.TransferModal.Currency), currency);
+            parameters.Add(nameof(Client.Modals.TransferModal.Amount), amount);
+
+            var modal = Modal.Show<Client.Modals.TransferModal>("Transfer", parameters);
+            var result = await modal.Result;
+
+            if(result.Cancelled)
+            {
+                await LoadWallets();
+            }
+
+        }
+        catch (AccessTokenNotAvailableException exception)
+        {
+            exception.Redirect();
+        }
+    }
+
+
+
+@*    private void MakeTransfer(string currency)
+    {
+        try
+        {
+            navManager.NavigateTo($"transfer/{currency}");
+        }
+        catch (AccessTokenNotAvailableException exception)
+        {
+            exception.Redirect();
+        }
+    }
+*@}

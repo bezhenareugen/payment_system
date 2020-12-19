@@ -1,0 +1,239 @@
+﻿@page "/transferhistory"
+@using PaymentSystem.Shared
+@using Microsoft.AspNetCore.Components.WebAssembly.Authentication
+@inject HttpClient Http
+
+ <link href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
+
+<div class="nav-page">
+    <h3>Transfer History</h3>
+    <div class="d-flex align-content-center">
+        <div class="mr-1">
+            <p class="m-0">Show</p>
+        </div>
+        <select @bind="itemsPerPage">
+            <option  @onclick="() => ChekPNum()" value="3">3</option>
+            <option  @onclick="() => ChekPNum()" value="6">6</option>
+            <option  @onclick="() => ChekPNum()" value="8">8</option>
+        </select>
+    </div>
+   
+</div>
+
+@if (PagenetedTransfer == null)
+{
+    <div>Loading...</div>
+}
+else
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th scope="col">Source User</th>
+                <th scope="col" class="sort-link">
+                    <a @onclick="() => SortByAmount()">Amount</a>
+                    <span class="fa @(SetSortIcon("Amount"))"></span>
+                </th>
+                <th scope="col">Currency</th>
+                <th scope="col">Destination</th>
+                <th scope="col" class="sort-link">
+                    <a @onclick="() => SortByDate()">Date</a>
+                    <span class="fa @(SetSortIcon("Date"))"></span>
+                </th>           
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in PagenetedTransfer.Transactions)
+            {
+            <tr>
+                <td>@item.SourceUsername</td>
+                <td>@item.Amount</td>
+                <td>@item.Currency</td>
+                <td>@item.DestinationUsername</td>
+                <td>@item.Date</td>
+            </tr>
+            }
+        </tbody>
+    </table>
+
+    <nav aria-label="Page navigation example">
+        <ul class="pagination justify-content-end">
+            <li class="page-item pagination__cursor @(pageNumber == 1 ? "disabled" : "")">
+                <a class="page-link " @onclick="() => FirstPage()">First</a>
+            </li>
+            <li class="page-item pagination__cursor  @(pageNumber == 1 ? "disabled" : "")">
+                <a class="page-link" @onclick="() => PreviousPage()">Previous</a>
+            </li>
+            @for (int i = Math.Clamp(pageNumber - 2, 1, Decimal.ToInt32(PagenetedTransfer.MaxPageNumber)); i <= Math.Clamp(pageNumber + 2, 1, PagenetedTransfer.MaxPageNumber); i++)
+            {
+                var buttonNumber = i;
+                <li class="page-item  @(i == pageNumber ? "active" : "")"><a class="page-link sort-link" @onclick="() => LoadTransactions(buttonNumber)">@buttonNumber</a></li>
+            }
+            <li class="page-item pagination__cursor @(pageNumber == PagenetedTransfer.MaxPageNumber ? "disabled" : "")">
+                <a class="page-link" @onclick="() => NextPage()">Next</a>
+            </li>
+            <li class="page-item pagination__cursor @(pageNumber == PagenetedTransfer.MaxPageNumber ? "disabled" : "")">
+                <a class="page-link"  @onclick="() => LastPage()">Last</a>
+            </li>
+        </ul>
+    </nav>
+}
+
+<style>
+    .sort-link {
+        cursor: pointer;
+    }
+
+    .nav-page {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .pagination__cursor {
+        cursor: pointer;
+    }
+</style>
+
+
+@code {
+    private PaginetedTransferHistory PagenetedTransfer;
+    private string SortDir { get; set; } = "desc";
+    private string SortBy { get; set; } = "Date";
+    private int pageNumber { get; set; } = 1;
+    private int itemsPerPage { get; set; } = 8;
+    private string activeSortColumn = "Date";
+
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadTransactions(pageNumber);
+    }
+
+    private async Task LoadTransactions(int pNum)
+    {
+        try
+        {         
+            PagenetedTransfer = await Http.GetFromJsonAsync<PaginetedTransferHistory>($"api/transferhistory?sortDir={SortDir}&sortBy={SortBy}&pageNumber={pNum}&itemsPerPage={itemsPerPage}");
+
+            pageNumber = pNum;
+        }
+        catch (AccessTokenNotAvailableException exception)
+        {
+            exception.Redirect();
+        }
+    }
+
+
+    private async Task ChekPNum()
+    {
+        if (pageNumber > (PagenetedTransfer.TransactionsCount / itemsPerPage))
+        {
+            pageNumber = PagenetedTransfer.TransactionsCount / itemsPerPage;
+
+            await LoadTransactions(pageNumber);
+        }
+        else
+        {
+            await LoadTransactions(pageNumber);
+        }
+    }
+
+    private async Task ChangePage(int cureentPage)
+    {
+        pageNumber = cureentPage;
+
+        await LoadTransactions(pageNumber);
+    }
+
+    private void SortDirFilter()
+    {
+        SortDir = SortDir == "asc" ? "desc" : "asc";
+    }
+
+
+    private async Task SortByDate()
+    {
+        SortBy = "Date";
+        activeSortColumn = "Date";
+        try
+        {
+            SortDirFilter();
+
+            await LoadTransactions(pageNumber);
+        }
+        catch (AccessTokenNotAvailableException exception)
+        {
+            exception.Redirect();
+        }
+    }
+
+
+    private async Task SortByAmount()
+    {
+        SortBy = "Amount";
+        activeSortColumn = "Amount";
+
+        try
+        {
+            SortDirFilter();
+            await LoadTransactions(pageNumber);
+        }
+        catch (AccessTokenNotAvailableException exception)
+        {
+            exception.Redirect();
+        }
+    }
+
+
+    private string SetSortIcon(string columnName)
+    {
+        if (activeSortColumn != columnName)
+        {
+            return string.Empty;
+        }
+        if (SortDir == "asc")
+        {
+            return "fa-sort-up";
+        }
+        else
+        {
+            return "fa-sort-down";
+        }
+    }
+
+    private async Task FirstPage()
+    {
+        pageNumber = 1;
+
+        await LoadTransactions(pageNumber);
+    }
+
+
+    private async Task NextPage()
+    {
+        if (pageNumber < PagenetedTransfer.MaxPageNumber)
+        {
+            pageNumber += 1;
+
+            await LoadTransactions(pageNumber);
+        }
+    }
+
+
+    private async Task PreviousPage()
+    {
+        if (pageNumber > 1)
+        {
+            pageNumber -= 1;
+            await LoadTransactions(pageNumber);
+        }
+    }
+
+    private async Task LastPage()
+    {
+        pageNumber = Convert.ToInt32(PagenetedTransfer.MaxPageNumber);
+
+        await LoadTransactions(pageNumber);
+    }
+}

@@ -11,9 +11,17 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using System.Linq;
+using MediatR;
 using PaymentSystem.Server.Data;
 using PaymentSystem.Server.Models;
 using System.Security.Claims;
+using Blazored.Modal;
+using PaymentSystem.Server.Middleware;
+using Hangfire;
+using Hangfire.MemoryStorage;
+using System;
+using PaymentSystem.Server.Services;
+using PaymentSystem.Server.Services.ConverterOfCurrencyService;
 
 namespace PaymentSystem.Server
 {
@@ -46,12 +54,30 @@ namespace PaymentSystem.Server
             services.Configure<IdentityOptions>(options =>
             options.ClaimsIdentity.UserIdClaimType = ClaimTypes.NameIdentifier);
 
+         
+            services.AddHangfire(options =>
+            {
+                options.UseMemoryStorage();
+            });
+
+           
+            services.AddScoped<IGetDataFromApi, GetDataFromApi>();
+            services.AddScoped<IConverterOfCurrency, ConverterOfCurrency>();
+
+            services.AddBlazoredModal();
+
+            services.AddMediatR(typeof(Startup));
+
+            services.AddTransient<ExceptionHandlingMiddleware>();
+
             services.AddControllersWithViews();
             services.AddRazorPages();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env,
+            IRecurringJobManager recurringJobManager,          
+            IGetDataFromApi getDataFromApi)
         {
             if (env.IsDevelopment())
             {
@@ -66,6 +92,13 @@ namespace PaymentSystem.Server
                 app.UseHsts();
             }
 
+            app.UseHangfireServer();
+            app.UseHangfireDashboard("/dash");
+            recurringJobManager.AddOrUpdate(
+                "Hello Msg",
+                () => getDataFromApi.GetData(),
+                " 0 * * * * ");
+
             app.UseHttpsRedirection();
             app.UseBlazorFrameworkFiles();
             app.UseStaticFiles();
@@ -75,6 +108,8 @@ namespace PaymentSystem.Server
             app.UseIdentityServer();
             app.UseAuthentication();
             app.UseAuthorization();
+
+            app.UseMiddleware<ExceptionHandlingMiddleware>();
 
             app.UseEndpoints(endpoints =>
             {
